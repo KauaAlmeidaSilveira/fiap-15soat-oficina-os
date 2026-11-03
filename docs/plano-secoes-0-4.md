@@ -1,6 +1,6 @@
 # Plano — Tech Challenge Fase 4, Seções 0 a 4 e higiene
 
-> Estado: **aprovado em 02/11/2026; passos 1 a 6 implementados e testados localmente em 03/11/2026**. Falta validar com AWS, Mercado Pago e SonarCloud reais (seção 1).
+> Estado: **aprovado em 02/11/2026; passos 1 a 6 implementados e testados localmente em 02/11/2026**. Falta validar com AWS, Mercado Pago e SonarCloud reais (seção 1).
 > Base: `CHECKLIST.md`, PDF do enunciado, código de `fiap-15soat-oficina-api` e `lambda-auth`, documentação do Mercado Pago lida em 02/11/2026.
 > Marcação: **[Dn]** decisão do checklist · **[técnico]** escolha de implementação.
 
