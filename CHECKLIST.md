@@ -34,9 +34,11 @@ sh scripts/gerar-chaves-locais.sh
 sh scripts/rodar-bdd.sh   # sobe tudo, roda os 12 cenários e derruba
 ```
 
+Para testar pelo Postman, siga a descrição da collection em `postman/oficina-fase4.collection.json`. A pasta `postman/` fica fora dos repositórios por enquanto.
+
 ### O que os testes provam e o que não provam
 
-- **Provado localmente:** fluxo completo da OS até a entrega, compensações F1 a F10 e reinício do orquestrador, com os 3 serviços em Docker.
+- **Provado localmente:** fluxo completo da OS até a entrega, compensações F1 a F10 e reinício do orquestrador, com os 3 serviços em Docker. A collection repete o fluxo e as falhas, menos F3 e o reinício.
 - **Simulado:** SQS e DynamoDB no LocalStack, Mercado Pago no WireMock e e-mail no Mailpit.
 - **Nunca testado em ambiente real:** AWS, API real do Mercado Pago, CI e SonarCloud.
 - **Suposições do Mercado Pago a conferir na primeira compra de teste:** caminho do `qr_data`, método de cancelamento, formato da assinatura do webhook e status de pagamento recusado. Seguem a documentação.
@@ -66,7 +68,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 02/11/2026: **146 pendentes, 174 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 02/11/2026: **143 pendentes, 180 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -79,7 +81,7 @@ Contagem de 02/11/2026: **146 pendentes, 174 concluídos, 3 não verificáveis**
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
-| 9. Entregáveis | 39 | Médio |
+| 9. Entregáveis | 36 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -399,7 +401,8 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 | Evidência de cobertura no README (print ou link) | [ ] | [ ] | [ ] |
 | Documentação da arquitetura do serviço | [ ] | [ ] | [ ] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
-| Swagger conferido com o serviço no ar, ou collection Postman | [ ] | [ ] | [ ] |
+| Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
+| Collection Postman atualizada, em `postman/` na pasta da Fase 4 | [x] | [x] | [x] |
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [ ] | [ ] | [ ] |
 
