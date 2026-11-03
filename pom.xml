@@ -19,7 +19,11 @@
 
     <properties>
         <java.version>21</java.version>
+        <sonar.organization>kauaalmeidasilveira</sonar.organization>
+        <sonar.projectKey>KauaAlmeidaSilveira_fiap-15soat-oficina-os</sonar.projectKey>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <spring-cloud-aws.version>3.1.1</spring-cloud-aws.version>
+        <cucumber.version>7.18.1</cucumber.version>
         <!-- A versao gerida pelo Boot 3.2 nao conversa com o Docker Engine 29 -->
         <testcontainers.version>1.21.4</testcontainers.version>
         <springdoc.version>2.5.0</springdoc.version>
@@ -151,6 +155,23 @@
             <version>3.9.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -224,12 +245,7 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>PACKAGE</element>
-                                    <includes>
-                                        <include>br.com.fiap.oficina.core.usecase</include>
-                                        <include>br.com.fiap.oficina.core.domain.entity</include>
-                                        <include>br.com.fiap.oficina.entrypoint.controller</include>
-                                    </includes>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>INSTRUCTION</counter>

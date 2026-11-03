@@ -10,15 +10,15 @@
 
 ## Dimensão
 
-Contagem de 02/11/2026: **234 pendentes, 48 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 03/11/2026: **157 pendentes, 125 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
 | 0. Decisões em aberto | 4 | Pequeno, mas trava o resto |
-| 1. Separação em Microsserviços | 47 | **Muito grande** |
-| 2. Comunicação entre Microsserviços | 13 | Grande |
-| 3. Saga Pattern | 15 | **Muito grande** |
-| 4. Testes e Qualidade | 17 | Grande |
+| 1. Separação em Microsserviços | 8 | **Muito grande** |
+| 2. Comunicação entre Microsserviços | 3 | Grande |
+| 3. Saga Pattern | 0 | **Muito grande** |
+| 4. Testes e Qualidade | 4 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
 | 6. Infraestrutura | 33 | Grande |
 | 7. Monitoramento e Observabilidade | 18 | Médio |
@@ -91,30 +91,30 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 ### OS Service
 
-- [ ] Abertura da OS
-- [ ] Atualização de status
-- [ ] Consulta de status
-- [ ] Histórico da OS
-- [ ] Rotas do cliente `GET /api/minhas-ordens-servico` e `/{id}`, com `clienteId` vindo do `sub` do token
-- [ ] Listagem padrão preservada (oculta finalizadas, ordena por prioridade de status)
-- [ ] `GET /api/ordens-servico/metricas/tempo-medio` recalculada com os dados que o serviço passa a ter
-- [ ] Novos status na máquina de estados de `OrdemServico` (D1, D2)
-- [ ] Remover o atalho `AGUARDANDO_APROVACAO → EM_EXECUCAO` em `avancarStatus` (D11)
-- [ ] Bloquear adição e remoção de item depois de paga (D3)
-- [ ] CRUD de cliente migrado, com ciclo de vida `ATIVO`/`INATIVO` (D4)
-- [ ] CRUD de veículo migrado, com vínculo cliente-veículo (D4)
-- [ ] Usuários e roles migrados, com `POST /api/auth/register` (D4)
+- [x] Abertura da OS
+- [x] Atualização de status
+- [x] Consulta de status
+- [x] Histórico da OS
+- [x] Rotas do cliente `GET /api/minhas-ordens-servico` e `/{id}`, com `clienteId` vindo do `sub` do token
+- [x] Listagem padrão preservada (oculta finalizadas, ordena por prioridade de status)
+- [x] `GET /api/ordens-servico/metricas/tempo-medio` recalculada com os dados que o serviço passa a ter
+- [x] Novos status na máquina de estados de `OrdemServico` (D1, D2)
+- [x] Remover o atalho `AGUARDANDO_APROVACAO → EM_EXECUCAO` em `avancarStatus` (D11)
+- [x] Bloquear adição e remoção de item depois de paga (D3)
+- [x] CRUD de cliente migrado, com ciclo de vida `ATIVO`/`INATIVO` (D4)
+- [x] CRUD de veículo migrado, com vínculo cliente-veículo (D4)
+- [x] Usuários e roles migrados, com `POST /api/auth/register` (D4)
 
 ### Billing Service
 
-- [ ] Gerar orçamento a partir dos itens da OS
-- [ ] Enviar orçamento por e-mail (migrar `NotificacaoAprovacaoGateway`, SMTP e template)
-- [ ] Aprovação e recusa pelo link (migrar `/aprovacao-os`, `TokenAprovacaoGateway` e página de confirmação)
-- [ ] Manter a idempotência do link de aprovação, hoje garantida pelo status da OS (segunda tentativa → 409)
-- [ ] Manter o token de aprovação e o de sessão mutuamente excludentes (falha de segurança já corrigida na Fase 3)
-- [ ] Registrar pagamento
-- [ ] Verificar pagamento
-- [ ] Informar ao OS Service o resultado, para atualizar o status após o pagamento
+- [x] Gerar orçamento a partir dos itens da OS
+- [x] Enviar orçamento por e-mail (migrar `NotificacaoAprovacaoGateway`, SMTP e template)
+- [x] Aprovação e recusa pelo link (migrar `/aprovacao-os`, `TokenAprovacaoGateway` e página de confirmação)
+- [x] Manter a idempotência do link de aprovação, hoje garantida pelo status da OS (segunda tentativa → 409)
+- [x] Manter o token de aprovação e o de sessão mutuamente excludentes (falha de segurança já corrigida na Fase 3)
+- [x] Registrar pagamento
+- [x] Verificar pagamento
+- [x] Informar ao OS Service o resultado, para atualizar o status após o pagamento
 
 ### Integração com Mercado Pago
 
@@ -123,69 +123,69 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 - [ ] Gerar QR dinâmico para o valor do orçamento
 - [ ] Receber webhook em rota pública do API Gateway
 - [ ] Validar a autenticidade do webhook conforme a documentação
-- [ ] Tratar webhook repetido sem duplicar pagamento
-- [ ] Consultar o status na API do Mercado Pago, sem confiar só no corpo do webhook
+- [x] Tratar webhook repetido sem duplicar pagamento
+- [x] Consultar o status na API do Mercado Pago, sem confiar só no corpo do webhook
 - [ ] Testar pagamento aprovado em ambiente de teste
 - [ ] Testar pagamento recusado em ambiente de teste
 - [ ] Testar QR expirado (D2)
 
 ### Execução e Produção
 
-- [ ] Fila de execução das OS
-- [ ] Atualizar status durante o diagnóstico (D12)
-- [ ] Atualizar status durante o reparo
-- [ ] Comunicar finalização ao OS Service
-- [ ] CRUD de produto migrado (D4)
-- [ ] Estoque migrado: movimentações, saldo e `sincronizarSaldo` (D4)
-- [ ] Baixa e devolução de estoque como operações idempotentes (D10)
+- [x] Fila de execução das OS
+- [x] Atualizar status durante o diagnóstico (D12)
+- [x] Atualizar status durante o reparo
+- [x] Comunicar finalização ao OS Service
+- [x] CRUD de produto migrado (D4)
+- [x] Estoque migrado: movimentações, saldo e `sincronizarSaldo` (D4)
+- [x] Baixa e devolução de estoque como operações idempotentes (D10)
 
 ### Banco por serviço
 
-- [ ] Banco próprio do OS Service (D6)
-- [ ] Banco próprio do Billing (D6)
-- [ ] Banco próprio de Execução (D6)
-- [ ] Pelo menos um banco relacional (SQL) em uso
-- [ ] Pelo menos um banco não relacional (NoSQL) em uso
-- [ ] Justificar a escolha de banco de cada serviço
-- [ ] Remover FK de `ordem_servico` para `cliente`, `veiculo` e `users` se os donos mudarem (D4)
-- [ ] Remover FK de `os_item` para `produto`, guardando cópia de nome, tipo e preço
+- [x] Banco próprio do OS Service (D6)
+- [x] Banco próprio do Billing (D6)
+- [x] Banco próprio de Execução (D6)
+- [x] Pelo menos um banco relacional (SQL) em uso
+- [x] Pelo menos um banco não relacional (NoSQL) em uso
+- [x] Justificar a escolha de banco de cada serviço
+- [x] Remover FK de `ordem_servico` para `cliente`, `veiculo` e `users` se os donos mudarem (D4) — os donos não mudaram; as FKs ficam
+- [x] Remover FK de `os_item` para `produto`, guardando cópia de nome, tipo e preço
 - [x] Remover FK de `movimentacao_estoque` para `ordem_servico`
-- [ ] Dividir o `DataLoader` por serviço, com IDs coerentes entre os serviços
+- [x] Dividir o `DataLoader` por serviço, com IDs coerentes entre os serviços
 - [x] Decidir se migra dados do RDS atual — não migra; cada serviço recomeça com carga inicial própria
 
 ## 2. Comunicação entre Microsserviços
 
-- [ ] Definir o que é REST síncrono e o que é evento
-- [ ] Documentar o catálogo de eventos (nome, produtor, consumidor, payload)
-- [ ] Provisionar o broker com Terraform (D5)
-- [ ] Criar as filas de cada fluxo (D5)
-- [ ] Criar dead-letter queue e política de retry
-- [ ] Consumidores idempotentes em cada serviço
-- [ ] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente)
-- [ ] Clientes REST com timeout e tratamento de falha
-- [ ] Autenticar chamadas entre serviços com JWT de serviço de curta duração, definindo quem pode assiná-lo
-- [ ] Confirmar que nenhum serviço acessa o banco de outro
-- [ ] `lambda-auth` deixa de ler `users` e `cliente` no banco diretamente (`src/repositorio.js`) (D4)
-- [ ] `lambda-auth` deixa de gravar `senha_hash` em `cliente` diretamente (D4)
-- [ ] Endpoint interno de apoio à autenticação, não exposto pelo Gateway (D4)
+- [x] Definir o que é REST síncrono e o que é evento
+- [x] Documentar o catálogo de eventos (nome, produtor, consumidor, payload)
+- [ ] Provisionar o broker com Terraform (D5) — `sqs.tf` em PR no `infra-k8s`, com `terraform validate` ok; falta a conta AWS para `plan` e `apply`
+- [ ] Criar as filas de cada fluxo (D5) — prontas no LocalStack; falta na conta AWS
+- [ ] Criar dead-letter queue e política de retry — configuradas no Terraform e no LocalStack; falta na conta AWS
+- [x] Consumidores idempotentes em cada serviço
+- [x] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente)
+- [x] Clientes REST com timeout e tratamento de falha
+- [x] Autenticar chamadas entre serviços com JWT de serviço de curta duração, definindo quem pode assiná-lo
+- [x] Confirmar que nenhum serviço acessa o banco de outro
+- [x] `lambda-auth` deixa de ler `users` e `cliente` no banco diretamente (`src/repositorio.js`) (D4)
+- [x] `lambda-auth` deixa de gravar `senha_hash` em `cliente` diretamente (D4)
+- [x] Endpoint interno de apoio à autenticação, não exposto pelo Gateway (D4)
 
 ## 3. Saga Pattern
 
-- [ ] Documentar a escolha (orquestrada ou coreografada) e justificar no README (D5)
-- [ ] Desenhar o fluxo feliz: abrir OS → diagnóstico → orçamento → aprovação → pagamento → execução → finalização (D1, D12)
-- [ ] Desenhar a compensação de cada etapa
-- [ ] Persistir o estado da Saga, para sobreviver a reinício de pod
-- [ ] Implementar o fluxo feliz
-- [ ] Compensação: orçamento recusado pelo cliente
-- [ ] Compensação: falha ao gerar orçamento
-- [ ] Compensação: cliente sem resposta (D9)
-- [ ] Compensação: pagamento recusado ou QR expirado, com devolução do estoque (D2, D10)
-- [ ] Compensação: falha ao enviar para execução
-- [ ] Compensação: estoque insuficiente na baixa (D18)
-- [ ] Compensação: falha ao gerar cobrança, com devolução do estoque (D18)
-- [ ] Compensação: cancelamento com reparo em andamento (D22)
-- [ ] Tratar mensagem duplicada, fora de ordem e serviço fora do ar
-- [ ] Forma reprodutível de provocar cada falha, para os testes e o vídeo
+- [x] Documentar a escolha (orquestrada ou coreografada) e justificar no README (D5)
+- [x] Desenhar o fluxo feliz: abrir OS → diagnóstico → orçamento → aprovação → pagamento → execução → finalização (D1, D12)
+- [x] Desenhar a compensação de cada etapa
+- [x] Persistir o estado da Saga, para sobreviver a reinício de pod
+- [x] Implementar o fluxo feliz
+- [x] Compensação: orçamento recusado pelo cliente
+- [x] Compensação: falha ao gerar orçamento
+- [x] Compensação: cliente sem resposta (D9)
+- [x] Compensação: pagamento recusado ou QR expirado, com devolução do estoque (D2, D10)
+- [x] Compensação: falha ao enviar para execução
+- [x] Compensação: estoque insuficiente na baixa (D18)
+- [x] Compensação: falha ao gerar cobrança, com devolução do estoque (D18)
+- [x] Compensação: cancelamento com reparo em andamento (D22)
+- [x] Tratar mensagem duplicada, fora de ordem e serviço fora do ar
+- [x] Forma reprodutível de provocar cada falha, para os testes e o vídeo
 
 ## 4. Testes e Qualidade
 
@@ -193,19 +193,19 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 
 | Critério | OS | Billing | Execução |
 |---|---|---|---|
-| Testes migrados do monólito | [x] | [ ] | [x] |
-| Testes unitários | [ ] | [ ] | [ ] |
-| Testes de integração com o broker e o banco | [ ] | [ ] | [ ] |
-| Gate de 80% sobre o serviço inteiro, não só 3 pacotes | [ ] | [ ] | [ ] |
+| Testes migrados do monólito | [x] | [x] | [x] |
+| Testes unitários | [x] | [x] | [x] |
+| Testes de integração com o broker e o banco | [x] | [x] | [x] |
+| Gate de 80% sobre o serviço inteiro, não só 3 pacotes | [x] | [x] | [x] |
 | Sonar sem falha no quality gate | [ ] | [ ] | [ ] |
 
 - [x] Escolher a ferramenta de BDD — Cucumber
 - [x] Escolher a ferramenta de qualidade — SonarCloud
 - [ ] Criar os projetos no SonarCloud
-- [ ] Pelo menos um fluxo completo em BDD (abrir OS até a finalização)
+- [x] Pelo menos um fluxo completo em BDD (abrir OS até a finalização)
 - [x] Definir onde o BDD do fluxo completo roda — no repositório do OS Service, subindo os outros serviços e a fila por Docker
-- [ ] Cenário BDD de falha com compensação (não exigido, mas reforça a demonstração da Saga)
-- [ ] `lambda-auth`: atualizar os testes depois de sair do acesso direto ao banco
+- [x] Cenário BDD de falha com compensação (não exigido, mas reforça a demonstração da Saga)
+- [x] `lambda-auth`: atualizar os testes depois de sair do acesso direto ao banco
 
 ## 5. CI/CD Automatizado
 
