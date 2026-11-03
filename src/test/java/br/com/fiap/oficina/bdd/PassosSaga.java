@@ -30,9 +30,17 @@ public class PassosSaga {
     private Long osId;
     private boolean simulacaoExecucao;
     private boolean simulacaoBilling;
+    private boolean prazoCurto;
+    private String idStubReembolso;
 
     @After
-    public void desligarSimulacao() {
+    public void desligarSimulacao() throws Exception {
+        if (idStubReembolso != null) {
+            sistema.enviar("DELETE", SistemaLocal.MERCADO_PAGO + "/__admin/mappings/" + idStubReembolso, null, false);
+        }
+        if (prazoCurto) {
+            recriarOs("P7D");
+        }
         if (simulacaoExecucao) {
             sistema.exigir("DELETE", SistemaLocal.EXECUCAO + "/api/simulacao/falha", null, 204);
         }
@@ -91,6 +99,51 @@ public class PassosSaga {
         decidirPeloLink("Recusar orçamento");
     }
 
+    @Dado("o prazo de decisão do orçamento é de {int} segundos")
+    public void prazoDeDecisao(int segundos) throws Exception {
+        prazoCurto = true;
+        recriarOs("PT" + segundos + "S");
+    }
+
+    @Dado("o Mercado Pago recusa reembolsos")
+    public void recusarReembolsos() {
+        idStubReembolso = sistema.ler(sistema.enviar("POST", SistemaLocal.MERCADO_PAGO + "/__admin/mappings", Map.of(
+                "priority", 1,
+                "request", Map.of("method", "POST", "urlPathPattern", "/v1/orders/[^/]+/refund"),
+                "response", Map.of("status", 400)), false).corpo()).get("id").asText();
+    }
+
+    @Quando("o Mercado Pago volta a aceitar reembolsos")
+    public void aceitarReembolsos() {
+        sistema.enviar("DELETE", SistemaLocal.MERCADO_PAGO + "/__admin/mappings/" + idStubReembolso, null, false);
+        idStubReembolso = null;
+    }
+
+    @Quando("o administrador reprocessa a Saga")
+    public void reprocessar() {
+        sistema.exigir("POST", SistemaLocal.OS + "/api/ordens-servico/" + osId + "/saga/reprocessar", null, 202);
+    }
+
+    @Quando("o Mercado Pago notifica um pagamento tardio")
+    public void notificarPagamentoTardio() {
+        responderOrder("processed");
+        notificarOrder();
+    }
+
+    @Então("o link de aprovação não vale mais")
+    public void linkInvalido() {
+        String texto = sistema.esperar("E-mail de orçamento", () -> textoDoEmail("aguardando aprovação"), t -> t != null);
+        Matcher link = Pattern.compile("Aprovar orçamento: (\\S+)").matcher(texto);
+        assertThat(link.find()).isTrue();
+        assertThat(sistema.enviar("GET", link.group(1), null, false).status()).isEqualTo(409);
+    }
+
+    private void recriarOs(String prazo) throws Exception {
+        ProcessBuilder comando = new ProcessBuilder("docker", "compose", "up", "-d", "--no-deps", "--wait", "oficina-os").inheritIO();
+        comando.environment().put("SAGA_PRAZO_DECISAO", prazo);
+        assertThat(comando.start().waitFor()).isZero();
+    }
+
     @Quando("o OS Service é reiniciado")
     public void reiniciarOs() throws Exception {
         Process processo = new ProcessBuilder("docker", "compose", "restart", "oficina-os").inheritIO().start();
@@ -111,7 +164,8 @@ public class PassosSaga {
     public void diagnostico() {
         iniciarDiagnostico();
         concluirDiagnostico();
-        esperarOs("AGUARDANDO_APROVACAO");
+        // Com prazo curto a OS pode passar por AGUARDANDO_APROVACAO sem ser observada: o e-mail prova o envio.
+        sistema.esperar("Orçamento enviado", () -> textoDoEmail("aguardando aprovação"), t -> t != null);
     }
 
     private void iniciarDiagnostico() {

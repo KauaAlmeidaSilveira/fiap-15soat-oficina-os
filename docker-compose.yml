@@ -128,6 +128,7 @@ services:
       SERVICO_JWT_PUBLIC_KEY: file:/app/keys/servico.public.key
       SERVICO_JWT_PRIVATE_KEY: file:/app/keys/servico.private.key
       EXECUCAO_BASE_URL: http://oficina-execucao:8080
+      SAGA_PRAZO_DECISAO: ${SAGA_PRAZO_DECISAO:-P7D}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
       NEW_RELIC_APP_NAME: oficina-os-local
     ports:
