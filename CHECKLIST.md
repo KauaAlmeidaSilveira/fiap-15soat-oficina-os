@@ -66,13 +66,13 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 02/11/2026: **145 pendentes, 174 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 02/11/2026: **146 pendentes, 174 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
 | 0. Decisões em aberto | 3 | Pequeno, mas trava o resto |
 | 1. Separação em Microsserviços | 9 | **Muito grande** |
-| 2. Comunicação entre Microsserviços | 3 | Grande |
+| 2. Comunicação entre Microsserviços | 4 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
@@ -227,7 +227,8 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 - [x] Configurar dead-letter queue e política de retry no Terraform e no LocalStack
 - [ ] Criar dead-letter queue e política de retry na conta AWS
 - [x] Consumidores idempotentes em cada serviço
-- [x] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente)
+- [x] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente), no OS, no Billing e no caminho por fila da Execução
+- [ ] Rotas de operador da Execução (`/diagnostico` e `/reparo`) gravando item e `outbox` na mesma transação — hoje são duas; uma queda entre elas perde o evento
 - [x] Clientes REST com timeout e tratamento de falha
 - [x] Autenticar chamadas entre serviços com JWT de serviço de curta duração, definindo quem pode assiná-lo
 - [x] Confirmar que nenhum serviço acessa o banco de outro
