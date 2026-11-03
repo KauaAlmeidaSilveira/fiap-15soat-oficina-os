@@ -56,7 +56,7 @@ class OrdemServicoGatewayImplIT {
     @DisplayName("Deve persistir o instante da mudança de status entre gravações")
     void devePersistirStatusAlteradoEm() {
         OrdemServico os = novaOsSalva();
-        os.avancarStatus();
+        os.iniciarDiagnostico();
 
         ordemServicoGateway.salvar(os);
 

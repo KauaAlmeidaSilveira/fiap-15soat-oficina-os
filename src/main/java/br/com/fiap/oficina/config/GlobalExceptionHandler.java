@@ -3,6 +3,7 @@ package br.com.fiap.oficina.config;
 import br.com.fiap.oficina.core.domain.exception.CredenciaisInvalidasException;
 import br.com.fiap.oficina.core.domain.exception.RecursoNaoEncontradoException;
 import br.com.fiap.oficina.core.domain.exception.RegraDeNegocioException;
+import br.com.fiap.oficina.core.domain.exception.ServicoIndisponivelException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -77,6 +78,15 @@ public class GlobalExceptionHandler {
         log.warn("Falha de autenticação: {}", ex.getMessage());
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
         pd.setTitle("Erro de autenticação");
+        pd.setProperty("timestamp", LocalDateTime.now());
+        return pd;
+    }
+
+    @ExceptionHandler(ServicoIndisponivelException.class)
+    public ProblemDetail handleServicoIndisponivel(ServicoIndisponivelException ex) {
+        log.error("Dependência indisponível: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+        pd.setTitle("Serviço indisponível");
         pd.setProperty("timestamp", LocalDateTime.now());
         return pd;
     }

@@ -1,0 +1,32 @@
+{
+  "mappings": [
+    {
+      "priority": 5,
+      "request": { "method": "POST", "url": "/v1/orders" },
+      "response": {
+        "status": 201,
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"id\":\"{{jsonPath request.body '$.external_reference'}}\",\"status\":\"created\",\"external_reference\":\"{{jsonPath request.body '$.external_reference'}}\",\"type_response\":{\"qr_data\":\"00020101021243650016COM.MERCADOLIBRE-simulado-{{jsonPath request.body '$.external_reference'}}\"}}"
+      }
+    },
+    {
+      "priority": 5,
+      "request": { "method": "GET", "urlPathPattern": "/v1/orders/[^/]+" },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"id\":\"{{request.pathSegments.[2]}}\",\"status\":\"created\",\"external_reference\":\"{{request.pathSegments.[2]}}\"}"
+      }
+    },
+    {
+      "priority": 5,
+      "request": { "method": "POST", "urlPathPattern": "/v1/orders/[^/]+/cancel" },
+      "response": { "status": 200, "headers": { "Content-Type": "application/json" }, "body": "{}" }
+    },
+    {
+      "priority": 5,
+      "request": { "method": "POST", "urlPathPattern": "/v1/orders/[^/]+/refund" },
+      "response": { "status": 200, "headers": { "Content-Type": "application/json" }, "body": "{}" }
+    }
+  ]
+}

@@ -2,25 +2,16 @@ package br.com.fiap.oficina.config;
 
 import br.com.fiap.oficina.core.domain.enums.StatusOS;
 import br.com.fiap.oficina.core.domain.enums.TipoDocumento;
-import br.com.fiap.oficina.core.domain.enums.TipoMovimentacao;
-import br.com.fiap.oficina.core.domain.enums.TipoProduto;
 import br.com.fiap.oficina.dataprovider.persistence.entity.Cliente;
 import br.com.fiap.oficina.dataprovider.persistence.entity.ClienteVeiculo;
-import br.com.fiap.oficina.dataprovider.persistence.entity.MovimentacaoEstoque;
 import br.com.fiap.oficina.dataprovider.persistence.entity.OrdemServico;
-import br.com.fiap.oficina.dataprovider.persistence.entity.OsItem;
-import br.com.fiap.oficina.dataprovider.persistence.entity.Produto;
 import br.com.fiap.oficina.dataprovider.persistence.entity.Role;
-import br.com.fiap.oficina.dataprovider.persistence.entity.SaldoEstoque;
 import br.com.fiap.oficina.dataprovider.persistence.entity.User;
 import br.com.fiap.oficina.dataprovider.persistence.entity.Veiculo;
 import br.com.fiap.oficina.dataprovider.persistence.repository.ClienteRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.ClienteVeiculoRepository;
-import br.com.fiap.oficina.dataprovider.persistence.repository.MovimentacaoEstoqueRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.OrdemServicoRepository;
-import br.com.fiap.oficina.dataprovider.persistence.repository.ProdutoRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.RoleRepository;
-import br.com.fiap.oficina.dataprovider.persistence.repository.SaldoEstoqueRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.UserRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Configuration
@@ -47,9 +37,6 @@ public class DataLoader {
             ClienteRepository clienteRepo,
             VeiculoRepository veiculoRepo,
             ClienteVeiculoRepository cvRepo,
-            ProdutoRepository produtoRepo,
-            SaldoEstoqueRepository saldoRepo,
-            MovimentacaoEstoqueRepository movRepo,
             OrdemServicoRepository osRepo,
             UserRepository userRepo,
             RoleRepository roleRepo) {
@@ -138,61 +125,7 @@ public class DataLoader {
             cvRepo.save(ClienteVeiculo.builder().cliente(maria).veiculo(hb20).build());
             cvRepo.save(ClienteVeiculo.builder().cliente(empresa).veiculo(sprinter).build());
 
-            // --- Produtos (Peças) ---
-            Produto filtroOleo = criarPeca(produtoRepo, saldoRepo, movRepo,
-                    "Filtro de Óleo", "Filtro original 1L", "45.00", "UN", 50);
-            criarPeca(produtoRepo, saldoRepo, movRepo,
-                    "Filtro de Ar", "Filtro de ar do motor", "35.00", "UN", 30);
-            Produto oleoMotor = criarPeca(produtoRepo, saldoRepo, movRepo,
-                    "Óleo Motor 5W30", "Óleo sintético 5W30 - 1L", "28.00", "L", 100);
-            criarPeca(produtoRepo, saldoRepo, movRepo,
-                    "Pastilha de Freio Dianteira", "Kit com 4 pastilhas", "120.00", "KIT", 20);
-            criarPeca(produtoRepo, saldoRepo, movRepo,
-                    "Correia Dentada", "Correia dentada + tensor", "180.00", "KIT", 15);
-
-            // --- Produtos (Serviços) ---
-            Produto trocaOleo = criarServico(produtoRepo,
-                    "Troca de Óleo e Filtro", "Mão de obra para troca de óleo", "80.00");
-            criarServico(produtoRepo,
-                    "Alinhamento e Balanceamento", "Alinhamento 4 rodas + balanceamento", "150.00");
-            criarServico(produtoRepo,
-                    "Revisão de Freios", "Inspeção e substituição de pastilhas/discos", "120.00");
-            criarServico(produtoRepo,
-                    "Troca de Correia Dentada", "Mão de obra para troca de correia", "200.00");
-
-            // --- Ordens de Serviço de exemplo ---
-            // OS 1 - Aguardando aprovação
-            OrdemServico os1 = OrdemServico.builder()
-                    .cliente(joao).veiculo(corolla)
-                    .numero("OS" + System.currentTimeMillis())
-                    .status(StatusOS.AGUARDANDO_APROVACAO)
-                    .descricaoProblema("Troca de óleo e revisão dos freios")
-                    .user(admin)
-                    .build();
-            os1.getItens().addAll(List.of(
-                    OsItem.builder().ordemServico(os1).produto(trocaOleo)
-                            .quantidade(1).precoUnitario(trocaOleo.getPrecoUnitario()).build(),
-                    OsItem.builder().ordemServico(os1).produto(oleoMotor)
-                            .quantidade(4).precoUnitario(oleoMotor.getPrecoUnitario()).build(),
-                    OsItem.builder().ordemServico(os1).produto(filtroOleo)
-                            .quantidade(1).precoUnitario(filtroOleo.getPrecoUnitario()).build()
-            ));
-            BigDecimal totalOs1 = os1.getItens().stream()
-                    .map(i -> BigDecimal.valueOf(i.getQuantidade()).multiply(i.getPrecoUnitario()))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            os1.setValorTotal(totalOs1);
-            osRepo.save(os1);
-
-            // OS 3 - Recebida (nova)
-            OrdemServico os3 = OrdemServico.builder()
-                    .cliente(empresa).veiculo(sprinter)
-                    .numero("OS" + (System.currentTimeMillis() + 1))
-                    .status(StatusOS.RECEBIDA)
-                    .descricaoProblema("Barulho ao frear - verificar freios dianteiros")
-                    .user(admin)
-                    .build();
-            osRepo.save(os3);
-
+            // Só OS encerradas, para a métrica de tempo médio: uma OS ativa precisa nascer pela Saga.
             // OS 4 - Finalizada com datas para alimentar a métrica de tempo médio
             LocalDateTime inicio4 = LocalDateTime.now().minusDays(2);
             LocalDateTime fim4 = inicio4.plusHours(3).plusMinutes(30);
@@ -228,32 +161,8 @@ public class DataLoader {
             log.info("=== Dados carregados com sucesso ===");
             log.info("Clientes: {}", clienteRepo.count());
             log.info("Veículos: {}", veiculoRepo.count());
-            log.info("Produtos: {}", produtoRepo.count());
             log.info("Ordens de Serviço: {}", osRepo.count());
             log.info("Swagger: http://localhost:8080/swagger-ui.html");
-            log.info("H2 Console: http://localhost:8080/h2-console");
         };
-    }
-
-    private Produto criarPeca(ProdutoRepository prodRepo, SaldoEstoqueRepository saldoRepo,
-                               MovimentacaoEstoqueRepository movRepo,
-                               String nome, String desc, String preco, String unidade, int qtdInicial) {
-        Produto p = prodRepo.save(Produto.builder()
-                .nome(nome).descricao(desc).tipo(TipoProduto.PECA)
-                .precoUnitario(new BigDecimal(preco)).unidadeMedida(unidade).ativo(true).build());
-        saldoRepo.save(SaldoEstoque.builder().produto(p).quantidade(qtdInicial).build());
-        movRepo.save(MovimentacaoEstoque.builder()
-                .produto(p)
-                .tipo(TipoMovimentacao.ENTRADA)
-                .quantidade(qtdInicial)
-                .motivo("Estoque inicial - carga do sistema")
-                .build());
-        return p;
-    }
-
-    private Produto criarServico(ProdutoRepository prodRepo, String nome, String desc, String preco) {
-        return prodRepo.save(Produto.builder()
-                .nome(nome).descricao(desc).tipo(TipoProduto.SERVICO)
-                .precoUnitario(new BigDecimal(preco)).ativo(true).build());
     }
 }

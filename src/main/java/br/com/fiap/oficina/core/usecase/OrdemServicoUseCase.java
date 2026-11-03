@@ -1,26 +1,25 @@
 package br.com.fiap.oficina.core.usecase;
 
 import br.com.fiap.oficina.core.domain.entity.Cliente;
+import br.com.fiap.oficina.core.domain.entity.HistoricoStatus;
 import br.com.fiap.oficina.core.domain.entity.OrdemServico;
 import br.com.fiap.oficina.core.domain.entity.OsItem;
 import br.com.fiap.oficina.core.domain.entity.Produto;
+import br.com.fiap.oficina.core.domain.entity.Saga;
 import br.com.fiap.oficina.core.domain.entity.Veiculo;
 import br.com.fiap.oficina.core.domain.enums.StatusOS;
-import br.com.fiap.oficina.core.domain.enums.TipoMovimentacao;
-import br.com.fiap.oficina.core.domain.enums.TipoProduto;
 import br.com.fiap.oficina.core.domain.exception.RecursoNaoEncontradoException;
 import br.com.fiap.oficina.core.domain.exception.RegraDeNegocioException;
 import br.com.fiap.oficina.core.gateway.ClienteGateway;
-import br.com.fiap.oficina.core.gateway.EstoqueGateway;
 import br.com.fiap.oficina.core.gateway.MetricasGateway;
-import br.com.fiap.oficina.core.gateway.NotificacaoAprovacaoGateway;
 import br.com.fiap.oficina.core.gateway.OrdemServicoGateway;
 import br.com.fiap.oficina.core.gateway.ProdutoGateway;
-import br.com.fiap.oficina.core.gateway.TokenAprovacaoGateway;
+import br.com.fiap.oficina.core.gateway.TransacaoGateway;
 import br.com.fiap.oficina.core.gateway.VeiculoGateway;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,34 +31,30 @@ public class OrdemServicoUseCase {
 
     private static final Map<StatusOS, Integer> PRIORIDADE_LISTAGEM = Map.of(
             StatusOS.EM_EXECUCAO, 1,
-            StatusOS.AGUARDANDO_APROVACAO, 2,
-            StatusOS.EM_DIAGNOSTICO, 3,
-            StatusOS.RECEBIDA, 4);
+            StatusOS.AGUARDANDO_PAGAMENTO, 2,
+            StatusOS.AGUARDANDO_APROVACAO, 3,
+            StatusOS.EM_DIAGNOSTICO, 4,
+            StatusOS.RECEBIDA, 5);
 
     private final OrdemServicoGateway osGateway;
     private final ClienteGateway clienteGateway;
     private final VeiculoGateway veiculoGateway;
     private final ProdutoGateway produtoGateway;
-    private final EstoqueGateway estoqueGateway;
-    private final TokenAprovacaoGateway tokenGateway;
-    private final NotificacaoAprovacaoGateway notificacaoGateway;
+    private final OrquestradorSagaUseCase orquestrador;
+    private final TransacaoGateway transacao;
     private final MetricasGateway metricasGateway;
-    private final String publicBaseUrl;
 
     public OrdemServicoUseCase(OrdemServicoGateway osGateway, ClienteGateway clienteGateway,
                                VeiculoGateway veiculoGateway, ProdutoGateway produtoGateway,
-                               EstoqueGateway estoqueGateway, TokenAprovacaoGateway tokenGateway,
-                               NotificacaoAprovacaoGateway notificacaoGateway,
-                               MetricasGateway metricasGateway, String publicBaseUrl) {
+                               OrquestradorSagaUseCase orquestrador, TransacaoGateway transacao,
+                               MetricasGateway metricasGateway) {
         this.osGateway = osGateway;
         this.clienteGateway = clienteGateway;
         this.veiculoGateway = veiculoGateway;
         this.produtoGateway = produtoGateway;
-        this.estoqueGateway = estoqueGateway;
-        this.tokenGateway = tokenGateway;
-        this.notificacaoGateway = notificacaoGateway;
+        this.orquestrador = orquestrador;
+        this.transacao = transacao;
         this.metricasGateway = metricasGateway;
-        this.publicBaseUrl = publicBaseUrl;
     }
 
     public record ItemNovo(Long produtoId, Integer quantidade, BigDecimal precoUnitario, String observacao) {}
@@ -94,7 +89,12 @@ public class OrdemServicoUseCase {
         }
         LOG.log(System.Logger.Level.INFO,
                 "Processando abertura da OS " + os.getNumero() + " com " + os.getItens().size() + " item(ns)");
-        OrdemServico criada = osGateway.salvar(os);
+        OrdemServico criada = transacao.executar(() -> {
+            OrdemServico salva = osGateway.salvar(os);
+            osGateway.registrarHistorico(new HistoricoStatus(salva.getId(), null, StatusOS.RECEBIDA, "OS aberta", LocalDateTime.now()));
+            orquestrador.iniciar(salva);
+            return salva;
+        });
         metricasGateway.ordemServicoCriada();
         LOG.log(System.Logger.Level.INFO,
                 "OS " + criada.getNumero() + " criada com sucesso, status " + criada.getStatus());
@@ -133,56 +133,51 @@ public class OrdemServicoUseCase {
         return osGateway.listarPorStatus(status);
     }
 
+    public List<HistoricoStatus> listarHistorico(Long osId) {
+        buscarPorId(osId);
+        return osGateway.listarHistorico(osId);
+    }
+
+    public Saga buscarSaga(Long osId) {
+        return orquestrador.buscarPorOs(osId);
+    }
+
+    /** Só registra a entrega: os demais avanços pertencem à Saga e ao serviço de Execução (D21). */
     public OrdemServico avancarStatus(Long id) {
         OrdemServico os = buscarPorId(id);
         StatusOS anterior = os.getStatus();
         LOG.log(System.Logger.Level.INFO,
                 "Recebida solicitação para avançar status da OS " + os.getNumero() + " (status atual: " + anterior + ")");
         Duration tempoNoStatusAnterior = os.tempoNoStatusAtual();
-        os.avancarStatus();
-        StatusOS novo = os.getStatus();
-
-        if (anterior == StatusOS.AGUARDANDO_APROVACAO) {
-            registrarSaidasEstoque(os);
-        }
-        OrdemServico salva = osGateway.salvar(os);
-
-        if (novo == StatusOS.AGUARDANDO_APROVACAO) {
-            notificarAprovacaoPendente(salva);
-        }
-        metricasGateway.transicaoDeStatus(anterior, novo, tempoNoStatusAnterior);
-        LOG.log(System.Logger.Level.INFO,
-                "OS " + salva.getNumero() + " avançou de " + anterior + " para " + novo);
-        if (novo == StatusOS.ENTREGUE) {
-            LOG.log(System.Logger.Level.INFO,
-                    "Ciclo de vida da OS " + salva.getNumero() + " concluído: entregue ao cliente");
-        }
-        return salva;
-    }
-
-    public OrdemServico aprovar(Long id, boolean aprovado) {
-        OrdemServico os = buscarPorId(id);
-        StatusOS anterior = os.getStatus();
-        LOG.log(System.Logger.Level.INFO,
-                "Recebida decisão de aprovação da OS " + os.getNumero() + ": aprovado=" + aprovado);
-        Duration tempoNoStatusAnterior = os.tempoNoStatusAtual();
-        os.aprovar(aprovado);
-        if (aprovado) {
-            registrarSaidasEstoque(os);
-        }
-        OrdemServico salva = osGateway.salvar(os);
+        os.entregar();
+        OrdemServico salva = transacao.executar(() -> {
+            OrdemServico gravada = osGateway.salvar(os);
+            osGateway.registrarHistorico(new HistoricoStatus(gravada.getId(), anterior, gravada.getStatus(), "Veículo entregue", LocalDateTime.now()));
+            return gravada;
+        });
         metricasGateway.transicaoDeStatus(anterior, salva.getStatus(), tempoNoStatusAnterior);
         LOG.log(System.Logger.Level.INFO,
-                "OS " + salva.getNumero() + " teve a aprovação processada: " + anterior + " -> " + salva.getStatus());
+                "Ciclo de vida da OS " + salva.getNumero() + " concluído: entregue ao cliente");
         return salva;
     }
 
-    public boolean processarDecisaoViaToken(String token) {
-        var decodificado = tokenGateway.validar(token);
+    public OrdemServico aprovar(Long id, boolean aprovado, String usuario) {
+        OrdemServico os = buscarPorId(id);
         LOG.log(System.Logger.Level.INFO,
-                "Processando decisão de aprovação via link de e-mail para a OS " + decodificado.osId());
-        aprovar(decodificado.osId(), decodificado.aprovado());
-        return decodificado.aprovado();
+                "Recebida decisão de aprovação da OS " + os.getNumero() + ": aprovado=" + aprovado);
+        orquestrador.solicitarDecisao(id, aprovado, usuario);
+        return os;
+    }
+
+    public OrdemServico cancelar(Long id, String motivo, String usuario) {
+        OrdemServico os = buscarPorId(id);
+        LOG.log(System.Logger.Level.INFO, "Recebida solicitação de cancelamento da OS " + os.getNumero() + ": " + motivo);
+        orquestrador.solicitarCancelamento(id, motivo, usuario);
+        return os;
+    }
+
+    public void reprocessarSaga(Long osId) {
+        orquestrador.reprocessar(osId);
     }
 
     public OrdemServico adicionarItem(Long osId, ItemNovo itemNovo) {
@@ -191,12 +186,6 @@ public class OrdemServicoUseCase {
         OsItem item = construirItem(itemNovo);
         os.adicionarItem(item);
         OrdemServico salva = osGateway.salvar(os);
-
-        if (os.isAprovada() && item.getProdutoTipo() == TipoProduto.PECA) {
-            estoqueGateway.registrarMovimentacao(item.getProdutoId(), TipoMovimentacao.SAIDA, item.getQuantidade(),
-                    "Saída automática - adição de item pós-aprovação da OS " + os.getNumero(), os.getId());
-            estoqueGateway.sincronizarSaldo(item.getProdutoId());
-        }
         LOG.log(System.Logger.Level.INFO,
                 "Item adicionado à OS " + salva.getNumero() + ": produto " + item.getProdutoNome());
         return salva;
@@ -209,12 +198,6 @@ public class OrdemServicoUseCase {
                 .filter(i -> itemId.equals(i.getId()))
                 .findFirst()
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Item não encontrado na OS informada"));
-
-        if (os.isAprovada() && item.getProdutoTipo() == TipoProduto.PECA) {
-            estoqueGateway.registrarMovimentacao(item.getProdutoId(), TipoMovimentacao.ENTRADA, item.getQuantidade(),
-                    "Estorno por remoção de item da OS " + os.getNumero(), os.getId());
-            estoqueGateway.sincronizarSaldo(item.getProdutoId());
-        }
         os.removerItem(item);
         OrdemServico salva = osGateway.salvar(os);
         LOG.log(System.Logger.Level.INFO,
@@ -237,53 +220,12 @@ public class OrdemServicoUseCase {
         Produto produto = produtoGateway.buscarPorId(in.produtoId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto", in.produtoId()));
         return OsItem.builder()
-                .produtoId(produto.getId())
-                .produtoNome(produto.getNome())
-                .produtoTipo(produto.getTipo())
+                .produtoId(produto.id())
+                .produtoNome(produto.nome())
+                .produtoTipo(produto.tipo())
                 .quantidade(in.quantidade())
-                .precoUnitario(in.precoUnitario() != null ? in.precoUnitario() : produto.getPrecoUnitario())
+                .precoUnitario(in.precoUnitario() != null ? in.precoUnitario() : produto.precoUnitario())
                 .observacao(in.observacao())
                 .build();
-    }
-
-    private void registrarSaidasEstoque(OrdemServico os) {
-        for (OsItem item : os.getItens()) {
-            if (item.getProdutoTipo() == TipoProduto.PECA) {
-                estoqueGateway.registrarMovimentacao(item.getProdutoId(), TipoMovimentacao.SAIDA, item.getQuantidade(),
-                        "Saída automática - aprovação da OS " + os.getNumero(), os.getId());
-                estoqueGateway.sincronizarSaldo(item.getProdutoId());
-                LOG.log(System.Logger.Level.INFO,
-                        "Baixa de estoque processada na OS " + os.getNumero() + ": produto " + item.getProdutoNome()
-                                + ", quantidade " + item.getQuantidade());
-            }
-        }
-    }
-
-    private void notificarAprovacaoPendente(OrdemServico os) {
-        try {
-            String tokenAprovar = tokenGateway.gerarToken(os.getId(), true);
-            String tokenRecusar = tokenGateway.gerarToken(os.getId(), false);
-            String linkAprovar = publicBaseUrl + "/aprovacao-os?token=" + tokenAprovar;
-            String linkRecusar = publicBaseUrl + "/aprovacao-os?token=" + tokenRecusar;
-
-            var dados = new NotificacaoAprovacaoGateway.Dados(
-                    os.getNumero(),
-                    os.getCliente().getNome(),
-                    os.getCliente().getEmail(),
-                    os.getVeiculo().getMarca(),
-                    os.getVeiculo().getModelo(),
-                    os.getVeiculo().getPlaca(),
-                    os.getItens().stream()
-                            .map(item -> new NotificacaoAprovacaoGateway.Dados.Item(
-                                    item.getProdutoNome(), item.getQuantidade(), item.getPrecoUnitario()))
-                            .toList(),
-                    os.getValorTotal());
-
-            notificacaoGateway.notificar(dados, linkAprovar, linkRecusar);
-        } catch (Exception e) {
-            LOG.log(System.Logger.Level.WARNING,
-                    "Falha ao notificar cliente sobre aprovação pendente da OS " + os.getNumero() + ": " + e.getMessage());
-            metricasGateway.falhaDeIntegracao("notificacao-aprovacao", e.getClass().getSimpleName());
-        }
     }
 }

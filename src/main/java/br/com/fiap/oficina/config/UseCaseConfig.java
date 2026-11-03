@@ -1,23 +1,29 @@
 package br.com.fiap.oficina.config;
 
+import br.com.fiap.oficina.core.gateway.AutenticacaoInternaGateway;
 import br.com.fiap.oficina.core.gateway.ClienteGateway;
+import br.com.fiap.oficina.core.gateway.CorrelacaoGateway;
 import br.com.fiap.oficina.core.gateway.CriptografiaSenhaGateway;
-import br.com.fiap.oficina.core.gateway.EstoqueGateway;
+import br.com.fiap.oficina.core.gateway.MensageriaGateway;
 import br.com.fiap.oficina.core.gateway.MetricasGateway;
-import br.com.fiap.oficina.core.gateway.NotificacaoAprovacaoGateway;
 import br.com.fiap.oficina.core.gateway.OrdemServicoGateway;
 import br.com.fiap.oficina.core.gateway.ProdutoGateway;
-import br.com.fiap.oficina.core.gateway.TokenAprovacaoGateway;
+import br.com.fiap.oficina.core.gateway.SagaGateway;
+import br.com.fiap.oficina.core.gateway.TransacaoGateway;
 import br.com.fiap.oficina.core.gateway.UsuarioGateway;
 import br.com.fiap.oficina.core.gateway.VeiculoGateway;
 import br.com.fiap.oficina.core.usecase.AuthUseCase;
+import br.com.fiap.oficina.core.usecase.AutenticacaoInternaUseCase;
 import br.com.fiap.oficina.core.usecase.ClienteUseCase;
 import br.com.fiap.oficina.core.usecase.OrdemServicoUseCase;
-import br.com.fiap.oficina.core.usecase.ProdutoUseCase;
+import br.com.fiap.oficina.core.usecase.OrquestradorSagaUseCase;
 import br.com.fiap.oficina.core.usecase.VeiculoUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
+import java.time.Duration;
 
 @Configuration
 public class UseCaseConfig {
@@ -33,22 +39,32 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public ProdutoUseCase produtoUseCase(ProdutoGateway produtoGateway, EstoqueGateway estoqueGateway) {
-        return new ProdutoUseCase(produtoGateway, estoqueGateway);
+    public OrquestradorSagaUseCase orquestradorSagaUseCase(
+            SagaGateway sagaGateway, OrdemServicoGateway ordemServicoGateway, MensageriaGateway mensageria,
+            TransacaoGateway transacao, CorrelacaoGateway correlacao, MetricasGateway metricasGateway,
+            @Value("${app.saga.prazo-etapa}") Duration prazoEtapa,
+            @Value("${app.saga.prazo-decisao}") Duration prazoDecisao,
+            @Value("${app.saga.margem-qr}") Duration margemQr) {
+        return new OrquestradorSagaUseCase(sagaGateway, ordemServicoGateway, mensageria, transacao, correlacao, metricasGateway,
+                new OrquestradorSagaUseCase.Prazos(prazoEtapa, prazoDecisao, margemQr), Clock.systemUTC());
     }
 
     @Bean
     public OrdemServicoUseCase ordemServicoUseCase(
             OrdemServicoGateway ordemServicoGateway, ClienteGateway clienteGateway, VeiculoGateway veiculoGateway,
-            ProdutoGateway produtoGateway, EstoqueGateway estoqueGateway, TokenAprovacaoGateway tokenAprovacaoGateway,
-            NotificacaoAprovacaoGateway notificacaoAprovacaoGateway, MetricasGateway metricasGateway,
-            @Value("${app.public-base-url:http://localhost:8080}") String publicBaseUrl) {
+            ProdutoGateway produtoGateway, OrquestradorSagaUseCase orquestrador, TransacaoGateway transacao,
+            MetricasGateway metricasGateway) {
         return new OrdemServicoUseCase(ordemServicoGateway, clienteGateway, veiculoGateway, produtoGateway,
-                estoqueGateway, tokenAprovacaoGateway, notificacaoAprovacaoGateway, metricasGateway, publicBaseUrl);
+                orquestrador, transacao, metricasGateway);
     }
 
     @Bean
     public AuthUseCase authUseCase(UsuarioGateway usuarioGateway, CriptografiaSenhaGateway criptografiaSenhaGateway) {
         return new AuthUseCase(usuarioGateway, criptografiaSenhaGateway);
+    }
+
+    @Bean
+    public AutenticacaoInternaUseCase autenticacaoInternaUseCase(AutenticacaoInternaGateway gateway) {
+        return new AutenticacaoInternaUseCase(gateway);
     }
 }
