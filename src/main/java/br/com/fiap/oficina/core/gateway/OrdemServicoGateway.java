@@ -1,5 +1,6 @@
 package br.com.fiap.oficina.core.gateway;
 
+import br.com.fiap.oficina.core.domain.entity.HistoricoStatus;
 import br.com.fiap.oficina.core.domain.entity.OrdemServico;
 import br.com.fiap.oficina.core.domain.enums.StatusOS;
 
@@ -21,4 +22,8 @@ public interface OrdemServicoGateway {
     List<OrdemServico> listarPorStatus(StatusOS status);
 
     List<OrdemServico> listarComTempoDeExecucao();
+
+    void registrarHistorico(HistoricoStatus historico);
+
+    List<HistoricoStatus> listarHistorico(Long osId);
 }

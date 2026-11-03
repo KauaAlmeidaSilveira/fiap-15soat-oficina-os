@@ -72,6 +72,12 @@ public class OrdemServico {
     private LocalDateTime dataFim;
     private LocalDateTime dataEntrega;
     private LocalDateTime dataAprovacao;
+    private LocalDateTime dataPagamento;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean itensCongelados = false;
+
     private LocalDateTime statusAlteradoEm;
 
     @Column(nullable = false, updatable = false)

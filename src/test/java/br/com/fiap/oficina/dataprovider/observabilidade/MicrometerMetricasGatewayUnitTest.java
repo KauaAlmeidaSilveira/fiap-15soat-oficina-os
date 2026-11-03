@@ -68,4 +68,14 @@ class MicrometerMetricasGatewayUnitTest {
         assertThat(registry.counter("oficina.os.transicoes",
                 "de", "RECEBIDA", "para", "EM_DIAGNOSTICO").count()).isEqualTo(1.0);
     }
+
+    @Test
+    @DisplayName("Deve contar transições da Saga e eventos fora de estado")
+    void deveContarSaga() {
+        gateway.sagaTransicao("GERANDO_ORCAMENTO", "AGUARDANDO_DECISAO");
+        gateway.eventoForaDeEstado("EstoqueBaixado", "CONCLUIDA");
+
+        assertThat(registry.get("oficina.saga.transicoes").tags("de", "GERANDO_ORCAMENTO", "para", "AGUARDANDO_DECISAO").counter().count()).isEqualTo(1);
+        assertThat(registry.get("oficina.saga.eventos.fora.de.estado").tags("tipo", "EstoqueBaixado", "estado", "CONCLUIDA").counter().count()).isEqualTo(1);
+    }
 }

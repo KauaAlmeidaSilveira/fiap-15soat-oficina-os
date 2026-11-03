@@ -1,5 +1,6 @@
 package br.com.fiap.oficina.dataprovider.gateway;
 
+import br.com.fiap.oficina.core.domain.entity.HistoricoStatus;
 import br.com.fiap.oficina.core.domain.entity.OrdemServico;
 import br.com.fiap.oficina.core.domain.entity.OsItem;
 import br.com.fiap.oficina.core.domain.enums.StatusOS;
@@ -8,7 +9,8 @@ import br.com.fiap.oficina.core.gateway.OrdemServicoGateway;
 import br.com.fiap.oficina.dataprovider.persistence.mapper.OrdemServicoPersistenceMapper;
 import br.com.fiap.oficina.dataprovider.persistence.repository.ClienteRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.OrdemServicoRepository;
-import br.com.fiap.oficina.dataprovider.persistence.repository.ProdutoRepository;
+import br.com.fiap.oficina.dataprovider.persistence.entity.HistoricoStatusEntity;
+import br.com.fiap.oficina.dataprovider.persistence.repository.HistoricoStatusRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,12 +28,12 @@ import java.util.stream.Collectors;
 public class OrdemServicoGatewayImpl implements OrdemServicoGateway {
 
     private static final List<StatusOS> EXCLUIDAS_LISTAGEM =
-            List.of(StatusOS.FINALIZADA, StatusOS.ENTREGUE, StatusOS.REPROVADA);
+            List.of(StatusOS.FINALIZADA, StatusOS.ENTREGUE, StatusOS.REPROVADA, StatusOS.CANCELADA);
 
     private final OrdemServicoRepository osRepository;
     private final ClienteRepository clienteRepository;
     private final VeiculoRepository veiculoRepository;
-    private final ProdutoRepository produtoRepository;
+    private final HistoricoStatusRepository historicoRepository;
     private final OrdemServicoPersistenceMapper mapper;
 
     @Override
@@ -50,6 +52,8 @@ public class OrdemServicoGatewayImpl implements OrdemServicoGateway {
         entity.setDataFim(os.getDataFim());
         entity.setDataEntrega(os.getDataEntrega());
         entity.setDataAprovacao(os.getDataAprovacao());
+        entity.setDataPagamento(os.getDataPagamento());
+        entity.setItensCongelados(os.isItensCongelados());
         entity.setStatusAlteradoEm(os.getStatusAlteradoEm());
         sincronizarItens(entity, os.getItens());
 
@@ -74,7 +78,9 @@ public class OrdemServicoGatewayImpl implements OrdemServicoGateway {
             if (di.getId() == null) {
                 entity.getItens().add(br.com.fiap.oficina.dataprovider.persistence.entity.OsItem.builder()
                         .ordemServico(entity)
-                        .produto(produtoRepository.getReferenceById(di.getProdutoId()))
+                        .produtoId(di.getProdutoId())
+                        .produtoNome(di.getProdutoNome())
+                        .produtoTipo(di.getProdutoTipo())
                         .quantidade(di.getQuantidade())
                         .precoUnitario(di.getPrecoUnitario())
                         .observacao(di.getObservacao())
@@ -117,5 +123,25 @@ public class OrdemServicoGatewayImpl implements OrdemServicoGateway {
     @Transactional(readOnly = true)
     public List<OrdemServico> listarComTempoDeExecucao() {
         return osRepository.findComTempoDeExecucao().stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    @Transactional
+    public void registrarHistorico(HistoricoStatus historico) {
+        historicoRepository.save(HistoricoStatusEntity.builder()
+                .osId(historico.osId())
+                .de(historico.de())
+                .para(historico.para())
+                .motivo(historico.motivo())
+                .em(historico.em())
+                .build());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HistoricoStatus> listarHistorico(Long osId) {
+        return historicoRepository.findByOsIdOrderByIdAsc(osId).stream()
+                .map(h -> new HistoricoStatus(h.getOsId(), h.getDe(), h.getPara(), h.getMotivo(), h.getEm()))
+                .toList();
     }
 }
