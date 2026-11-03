@@ -126,7 +126,7 @@ Levantamentos que destravam as decisões:
 
 ### Os repositórios
 
-Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` deixa de ser o serviço de produção.
+Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` deixa de ser o serviço de produção e fica na pasta local `legado/`, só como registro da Fase 3.
 
 | # | Repositório | Papel | Situação |
 |---|---|---|---|
