@@ -1,6 +1,6 @@
 # Checklist de Entrega — Tech Challenge Fase 4
 
-> Estado conferido em 02/11/2026 contra o código, as branches e os PRs de cada repositório.
+> Estado conferido em 08/11/2026 contra o código, as branches, os PRs e as regras de proteção de cada repositório.
 > Legenda: `[ ]` pendente · `[x]` concluído · `[?]` não verificável localmente (falta ferramenta/credencial, não falta de trabalho). Sem status "parcial": um item composto por várias partes vira uma linha por parte, cada uma binária. Por isso, o que está pronto no local e falta validar no ambiente real aparece em duas linhas.
 > `(Dn)` indica que o item depende da decisão `n` da Seção 0.
 
@@ -34,7 +34,7 @@ sh scripts/gerar-chaves-locais.sh
 sh scripts/rodar-bdd.sh   # sobe tudo, roda os 12 cenários e derruba
 ```
 
-Para testar pelo Postman, siga a descrição da collection em `postman/oficina-fase4.collection.json`. A pasta `postman/` fica fora dos repositórios por enquanto.
+Para testar pelo Postman, siga a descrição da collection em `postman/oficina-fase4.collection.json`. A pasta `postman/` fica fora dos repositórios: o enunciado pede "Swagger ou collection Postman" por repositório, e o Swagger já cobre os 3 serviços.
 
 ### O que os testes provam e o que não provam
 
@@ -60,6 +60,7 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
 - **Conta AWS:** outra conta Academy ou a conta do Júlio.
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora.
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -68,7 +69,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **145 pendentes, 182 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 08/11/2026: **146 pendentes, 182 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -77,7 +78,7 @@ Contagem de 08/11/2026: **145 pendentes, 182 concluídos, 3 não verificáveis**
 | 2. Comunicação entre Microsserviços | 3 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
-| 5. CI/CD Automatizado | 39 | Médio |
+| 5. CI/CD Automatizado | 40 | Médio |
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
@@ -300,12 +301,12 @@ A branch `chore/ci` foi publicada em 08/11/2026, mas ainda não tem PR. Ela saiu
 |---|---|---|---|---|---|---|
 | Branch principal chamada `main` | [x] | [x] | [x] | [ ] | [x] | [x] |
 | PR obrigatório | [ ] | [ ] | [ ] | [x] | [x] | [x] |
-| Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [?] | [?] | [?] |
+| Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [?] | [?] |
 | Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [ ] | [ ] |
 
-Em 02/11/2026, o `gh api` confirmou que a `main` dos 3 serviços está sem proteção (`Branch not protected`).
+Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está sem proteção (`Branch not protected`). Na `master` de `lambda-auth`, o PR é obrigatório, mas não há checagem obrigatória (`required_status_checks` vazio).
 
-`[?]`: o checklist da Fase 3 não cita status checks obrigatórios e o `gh api` devolveu 404 sem detalhar o motivo. Conferir nas configurações do GitHub.
+`[?]`: em `infra-k8s` e `infra-db`, o `gh api` devolve 404 para a conta do Kauã, sem detalhar o motivo, e não há ruleset na `main`. Conferir com o Júlio, dono dos repositórios.
 
 ## 6. Infraestrutura
 
