@@ -18,9 +18,9 @@
 
 | Repositório | Branch de trabalho | Situação | Testes da última execução local |
 |---|---|---|---|
-| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) aberto; commit local sem push com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
+| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) aberto, com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
 | `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) aberto | 82 testes, 95,4% de cobertura |
-| `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) aberto; commits locais sem push, incluindo os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
+| `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) aberto, com os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
 | `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) aberto | 45 testes; `terraform validate` ok |
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) aberto | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) aberto | `terraform validate` ok |
@@ -51,7 +51,7 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 
 1. **Revisar o que foi feito:** ler os PRs na ordem Execução, Billing e OS. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **Decidir os PRs do Júlio:** manter ou fechar `infra-k8s` e `infra-db`. O merge deles e o de `lambda-auth` dispara `terraform apply`, então só com a conta AWS definida.
-3. **Fazer o merge dos serviços:** Execução, Billing e OS, nessa ordem, depois do push dos commits locais do OS.
+3. **Fazer o merge dos serviços:** Execução, Billing e OS, nessa ordem.
 4. **Liberar o CI:** rodar `gh auth refresh -s workflow -h github.com`, publicar `chore/ci` e proteger `main` nos 3 serviços.
 5. **Criar os acessos externos:** SonarCloud, conta AWS (outra conta Academy ou a do Júlio) e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
