@@ -68,7 +68,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **142 pendentes, 182 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 08/11/2026: **145 pendentes, 182 concluídos, 3 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -282,7 +282,8 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Etapa da pipeline | OS | Billing | Execução |
 |---|---|---|---|
 | Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`, publicada, sem PR) | [x] | [x] | [x] |
-| Workflow publicado no GitHub | [ ] | [ ] | [ ] |
+| PR da `chore/ci` aberto contra `main`, depois do merge do PR #1 do serviço | [ ] | [ ] | [ ] |
+| Workflow publicado no GitHub (na `main`) | [ ] | [ ] | [ ] |
 | Build | [ ] | [ ] | [ ] |
 | Testes automatizados | [ ] | [ ] | [ ] |
 | Verificação de qualidade (Sonar) | [ ] | [ ] | [ ] |
@@ -291,7 +292,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
 | Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
 
-O workflow não foi publicado porque o token do `gh` não tem o escopo `workflow`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
+A branch `chore/ci` foi publicada em 08/11/2026, mas ainda não tem PR. Ela saiu da `feat/*`, então o PR dela fica para depois do merge do PR #1 de cada serviço; aberto antes contra `main`, ele mostraria também os commits da `feat/*`. O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
 
 ### Regras de proteção
 
