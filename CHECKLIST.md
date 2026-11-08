@@ -25,7 +25,7 @@
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) aberto | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) aberto | `terraform validate` ok |
 
-Os 3 serviços também têm a branch `chore/ci`, só local, com o workflow de CI que nunca rodou. Todo `[x]` de código neste checklist está nessas branches, não em `main`.
+Os 3 serviços também têm a branch `chore/ci`, publicada no GitHub em 08/11/2026 e sem PR, com o workflow de CI. Ele roda só em PR ou push para `main`, então ainda não rodou. Todo `[x]` de código neste checklist está nessas branches, não em `main`.
 
 Para ver o sistema funcionando, a partir de `fiap-15soat-oficina-os`, com o Docker ligado e os repositórios de Execução e Billing na pasta vizinha:
 
@@ -52,7 +52,7 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 1. **Revisar o que foi feito:** ler os PRs na ordem Execução, Billing e OS. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **Decidir os PRs do Júlio:** manter ou fechar `infra-k8s` e `infra-db`. O merge deles e o de `lambda-auth` dispara `terraform apply`, então só com a conta AWS definida.
 3. **Fazer o merge dos serviços:** Execução, Billing e OS, nessa ordem.
-4. **Liberar o CI:** rodar `gh auth refresh -s workflow -h github.com`, publicar `chore/ci` e proteger `main` nos 3 serviços.
+4. **Liberar o CI:** abrir o PR de `chore/ci` e proteger `main` nos 3 serviços. O escopo `workflow` da conta pessoal já foi liberado e a branch já foi publicada.
 5. **Criar os acessos externos:** SonarCloud, conta AWS (outra conta Academy ou a do Júlio) e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
@@ -281,7 +281,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 
 | Etapa da pipeline | OS | Billing | Execução |
 |---|---|---|---|
-| Workflow de build, testes, cobertura e Sonar escrito (branch local `chore/ci`) | [x] | [x] | [x] |
+| Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`, publicada, sem PR) | [x] | [x] | [x] |
 | Workflow publicado no GitHub | [ ] | [ ] | [ ] |
 | Build | [ ] | [ ] | [ ] |
 | Testes automatizados | [ ] | [ ] | [ ] |
