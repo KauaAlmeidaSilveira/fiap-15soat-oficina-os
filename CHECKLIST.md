@@ -56,11 +56,25 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 5. **Criar os acessos externos:** SonarCloud, conta AWS (outra conta Academy ou a do Júlio) e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
+### Antes de testar na AWS
+
+Aprovar e mergear os PRs coloca o código em `main`, mas não põe o sistema no ar. Ainda faltam, nas Seções 5 e 6:
+
+- manifestos Kubernetes dos 3 serviços (`Deployment`, `Service`, `ConfigMap`, `HPA`, probes, requests e limits);
+- ECR por serviço em `infra-k8s` (hoje só `${project_name}-api`);
+- databases `oficina_os` e `oficina_execucao` na RDS, com usuário próprio por serviço;
+- rotas por serviço no API Gateway, com um NLB interno por serviço, em `lambda-auth`;
+- roteiro de deploy: secrets (chaves JWT, banco, SMTP, New Relic, Mercado Pago), build e push das imagens e `kubectl apply`.
+
+**Ordem de merge e `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
+
+**Mercado Pago:** testar a cobrança na AWS exige conta e credenciais de teste do Mercado Pago (Seção 1). Sem elas, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
+
 ### Decisões em aberto
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
 - **Conta AWS:** outra conta Academy ou a conta do Júlio.
-- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora.
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio.
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -320,7 +334,7 @@ Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está s
 
 ### `infra-db`
 
-- [ ] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — hoje há uma só instância `aws_db_instance`
+- [ ] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — hoje há uma só instância `aws_db_instance`; decidido em 08/11/2026: a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço
 - [ ] Provisionar os bancos SQL na conta AWS (D6)
 - [x] Escrever o banco NoSQL (D6) — `dynamodb.tf`, no PR #1
 - [ ] Provisionar o banco NoSQL na conta AWS (D6)
