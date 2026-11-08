@@ -18,7 +18,7 @@
 
 | Repositório | Branch de trabalho | Situação | Testes da última execução local |
 |---|---|---|---|
-| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) aberto | 77 testes, 96,2% de cobertura |
+| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) aberto; commit local sem push com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
 | `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) aberto | 82 testes, 95,4% de cobertura |
 | `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) aberto; commits locais sem push, incluindo os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
 | `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) aberto | 45 testes; `terraform validate` ok |
@@ -230,7 +230,7 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 - [ ] Criar dead-letter queue e política de retry na conta AWS
 - [x] Consumidores idempotentes em cada serviço
 - [x] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente), no OS, no Billing e no caminho por fila da Execução
-- [ ] Rotas de operador da Execução (`/diagnostico` e `/reparo`) gravando item e `outbox` na mesma transação — hoje são duas; uma queda entre elas perde o evento
+- [x] Rotas de operador da Execução (`/diagnostico` e `/reparo`) gravando item e `outbox` na mesma transação — `@Transactional` nas 4 rotas de `ExecucaoController`; `ExecucaoControllerTransacaoIT` força falha na outbox e confirma que o item não muda
 - [x] Clientes REST com timeout e tratamento de falha
 - [x] Autenticar chamadas entre serviços com JWT de serviço de curta duração, definindo quem pode assiná-lo
 - [x] Confirmar que nenhum serviço acessa o banco de outro
