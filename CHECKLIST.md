@@ -74,10 +74,10 @@ Contagem de 08/11/2026: **145 pendentes, 182 concluídos, 3 não verificáveis**
 |---|---|---|
 | 0. Decisões em aberto | 3 | Pequeno, mas trava o resto |
 | 1. Separação em Microsserviços | 9 | **Muito grande** |
-| 2. Comunicação entre Microsserviços | 4 | Grande |
+| 2. Comunicação entre Microsserviços | 3 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
-| 5. CI/CD Automatizado | 36 | Médio |
+| 5. CI/CD Automatizado | 39 | Médio |
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
