@@ -34,7 +34,9 @@ sh scripts/gerar-chaves-locais.sh
 sh scripts/rodar-bdd.sh   # sobe tudo, roda os 12 cenários e derruba
 ```
 
-Para testar pelo Postman, siga a descrição da collection em `postman/oficina-fase4.collection.json`. A pasta `postman/` fica fora dos repositórios: o enunciado pede "Swagger ou collection Postman" por repositório, e o Swagger já cobre os 3 serviços.
+Para testar pelo Postman, siga a descrição da collection em `fiap-15soat-oficina-os/postman/`. A pasta foi versionada no OS em 08/11/2026, para o Júlio receber pelo git: o environment versionado fica sem tokens, e `postman/gerar-tokens.py` gera o `oficina-fase4.environment.local.json`, ignorado pelo git.
+
+Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhecer as regras de operação, ver o `CLAUDE.md` do repositório do OS.
 
 ### O que os testes provam e o que não provam
 
@@ -52,7 +54,7 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra (`infra-k8s`, `infra-db`, `lambda-auth`):** aprovados, mas o merge dispara `terraform apply`. O Júlio troca os secrets pelos da conta dele e mergeia na ordem de "Antes de testar na AWS", com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
-4. **Liberar o CI:** resolver o bloqueio de cobrança da conta `KauaAlmeidaSilveira` no GitHub (Settings → Billing), rodar de novo o CI dos PRs #2, mergear quando ficar verde e proteger `main` nos 3 serviços.
+4. **Liberar o CI:** desbloquear o GitHub Actions da conta `KauaAlmeidaSilveira` (ver ponto de atenção 8), rodar de novo o CI dos PRs #2, mergear quando ficar verde e proteger `main` nos 3 serviços.
 5. **Criar os acessos externos:** SonarCloud, secrets da conta AWS do Júlio (ver "Antes de testar na AWS") e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
@@ -95,7 +97,7 @@ Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os da
 ### Decisões em aberto
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
-- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço).
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -328,7 +330,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
 | Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
 
-O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`. A primeira execução não começou por bloqueio de cobrança da conta no GitHub ("your account is locked due to a billing issue"). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
+O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`. A primeira execução não começou: o GitHub Actions da conta está bloqueado (ponto de atenção 8). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
 
 ### Regras de proteção
 
@@ -439,7 +441,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 | Documentação da arquitetura do serviço | [ ] | [ ] | [ ] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
 | Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
-| Collection Postman atualizada, em `postman/` na pasta da Fase 4 | [x] | [x] | [x] |
+| Collection Postman atualizada, em `postman/` do repositório do OS | [x] | [x] | [x] |
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [ ] | [ ] | [ ] |
 
@@ -482,7 +484,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 5. **Paridade funcional.** A divisão não pode perder comportamento da Fase 3: as regras de `OrdemServicoUseCase`, de `Cliente` e de estoque precisam ser conferidas contra a tabela de endpoints da Seção 1.
 6. **Falha de notificação.** Resolvido pela D20: orçamento *best-effort*, QR com 3 tentativas e depois falha de cobrança.
 7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. A evidência no README depende do CI rodando.
-8. **Conta do GitHub com cobrança bloqueada.** Em 08/11/2026, o GitHub Actions recusou os jobs dos PRs #2 por "account is locked due to a billing issue" na conta `KauaAlmeidaSilveira`. Sem resolver, nenhum workflow roda nos repositórios dela, inclusive o `terraform` do `lambda-auth`.
+8. **GitHub Actions bloqueado na conta `KauaAlmeidaSilveira`.** Em 08/11/2026, os jobs dos PRs #2 não começaram: "The job was not started because your account is locked due to a billing issue". O bloqueio continuou depois de rodar de novo. A página de cobrança não mostra nada devido, e a conta nunca pagou pelo GitHub. O Actions funcionou no `lambda-auth` em 03/11/2026, então o bloqueio começou depois. Próximo passo: abrir chamado no suporte do GitHub (support.github.com) com a mensagem exata. Enquanto isso, nenhum workflow roda nos repositórios dessa conta, inclusive o `terraform` do `lambda-auth`; os repositórios do Júlio não são afetados.
 9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o merge dispara `terraform apply`. Não fazer sem a conta AWS definida.
 
 ---
