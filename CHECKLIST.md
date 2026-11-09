@@ -25,7 +25,7 @@
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) aberto | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) aberto | `terraform validate` ok |
 
-Os 3 serviços também têm a branch `chore/ci`, publicada no GitHub em 08/11/2026 e sem PR, com o workflow de CI. Ele roda só em PR ou push para `main`, então ainda não rodou. O código dos 3 serviços está em `main`; o de `lambda-auth`, `infra-k8s` e `infra-db` segue nas branches dos PRs aprovados.
+O workflow de CI está nos PRs #2 de cada serviço ([Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2), [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2), [OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2)), abertos em 08/11/2026. A primeira execução não começou: o GitHub Actions recusou com "The job was not started because your account is locked due to a billing issue". O PR [#3 do OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/3) leva este checklist atualizado para `main`. O código dos 3 serviços está em `main`; o de `lambda-auth`, `infra-k8s` e `infra-db` segue nas branches dos PRs aprovados.
 
 Para ver o sistema funcionando, a partir de `fiap-15soat-oficina-os`, com o Docker ligado e os repositórios de Execução e Billing na pasta vizinha:
 
@@ -52,7 +52,7 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra (`infra-k8s`, `infra-db`, `lambda-auth`):** aprovados, mas o merge dispara `terraform apply`. O Júlio troca os secrets pelos da conta dele e mergeia na ordem de "Antes de testar na AWS", com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
-4. **Liberar o CI:** abrir o PR de `chore/ci` e proteger `main` nos 3 serviços. O escopo `workflow` da conta pessoal já foi liberado e a branch já foi publicada.
+4. **Liberar o CI:** resolver o bloqueio de cobrança da conta `KauaAlmeidaSilveira` no GitHub (Settings → Billing), rodar de novo o CI dos PRs #2, mergear quando ficar verde e proteger `main` nos 3 serviços.
 5. **Criar os acessos externos:** SonarCloud, secrets da conta AWS do Júlio (ver "Antes de testar na AWS") e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
@@ -104,7 +104,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **144 pendentes, 184 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 08/11/2026: **141 pendentes, 187 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -113,7 +113,7 @@ Contagem de 08/11/2026: **144 pendentes, 184 concluídos, 2 não verificáveis**
 | 2. Comunicação entre Microsserviços | 3 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
-| 5. CI/CD Automatizado | 40 | Médio |
+| 5. CI/CD Automatizado | 37 | Médio |
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
@@ -317,8 +317,8 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 
 | Etapa da pipeline | OS | Billing | Execução |
 |---|---|---|---|
-| Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`, publicada, sem PR) | [x] | [x] | [x] |
-| PR da `chore/ci` aberto contra `main`, depois do merge do PR #1 do serviço | [ ] | [ ] | [ ] |
+| Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`) | [x] | [x] | [x] |
+| PR da `chore/ci` aberto contra `main` (PR #2 de cada serviço) | [x] | [x] | [x] |
 | Workflow publicado no GitHub (na `main`) | [ ] | [ ] | [ ] |
 | Build | [ ] | [ ] | [ ] |
 | Testes automatizados | [ ] | [ ] | [ ] |
@@ -328,7 +328,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
 | Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
 
-A branch `chore/ci` foi publicada em 08/11/2026, mas ainda não tem PR. Ela saiu da `feat/*`, então o PR dela fica para depois do merge do PR #1 de cada serviço; aberto antes contra `main`, ele mostraria também os commits da `feat/*`. O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
+O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`. A primeira execução não começou por bloqueio de cobrança da conta no GitHub ("your account is locked due to a billing issue"). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
 
 ### Regras de proteção
 
@@ -482,7 +482,8 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 5. **Paridade funcional.** A divisão não pode perder comportamento da Fase 3: as regras de `OrdemServicoUseCase`, de `Cliente` e de estoque precisam ser conferidas contra a tabela de endpoints da Seção 1.
 6. **Falha de notificação.** Resolvido pela D20: orçamento *best-effort*, QR com 3 tentativas e depois falha de cobrança.
 7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. A evidência no README depende do CI rodando.
-8. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o merge dispara `terraform apply`. Não fazer sem a conta AWS definida.
+8. **Conta do GitHub com cobrança bloqueada.** Em 08/11/2026, o GitHub Actions recusou os jobs dos PRs #2 por "account is locked due to a billing issue" na conta `KauaAlmeidaSilveira`. Sem resolver, nenhum workflow roda nos repositórios dela, inclusive o `terraform` do `lambda-auth`.
+9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o merge dispara `terraform apply`. Não fazer sem a conta AWS definida.
 
 ---
 
