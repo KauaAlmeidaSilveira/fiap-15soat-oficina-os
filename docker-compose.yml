@@ -1,51 +1,142 @@
-version: '3.8'
+# Sistema inteiro local. Requer os repositorios de Execucao e Billing na pasta vizinha e as chaves
+# de scripts/gerar-chaves-locais.sh. SQS e DynamoDB vem do LocalStack, o Mercado Pago do WireMock
+# e o SMTP do Mailpit (http://localhost:8025).
+x-aws-local: &aws-local
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_REGION: us-east-1
+  SPRING_CLOUD_AWS_SQS_ENDPOINT: http://localstack:4566
+
+x-saude: &saude
+  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+  interval: 5s
+  timeout: 5s
+  retries: 40
 
 services:
-
-  postgres:
+  postgres-os:
     image: postgres:16-alpine
-    container_name: oficina-postgres
-    restart: unless-stopped
     environment:
-      POSTGRES_DB: oficina
+      POSTGRES_DB: oficina_os
       POSTGRES_USER: oficina
       POSTGRES_PASSWORD: oficina123
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U oficina -d oficina"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U oficina -d oficina_os"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
-  oficina-api:
-    build: .
-    container_name: oficina-mecanica-api
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
+  postgres-execucao:
+    image: postgres:16-alpine
     environment:
-      SPRING_PROFILES_ACTIVE: default
-      DB_HOST: postgres
-      DB_PASSWORD: oficina123
-      JWT_PUBLIC_KEY: file:/app/keys/jwt.public.key
-      JWT_PRIVATE_KEY: file:/app/keys/jwt.private.key
-      GMAIL_SMTP_USERNAME: ${GMAIL_SMTP_USERNAME:-}
-      GMAIL_SMTP_PASSWORD: ${GMAIL_SMTP_PASSWORD:-}
-      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-http://localhost:8080}
-      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
-      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-oficina-api-local}
-      NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED: ${NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED:-true}
-    depends_on:
-      postgres:
-        condition: service_healthy
+      POSTGRES_DB: oficina_execucao
+      POSTGRES_USER: oficina
+      POSTGRES_PASSWORD: oficina123
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "pg_isready -U oficina -d oficina_execucao"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
-volumes:
-  postgres_data:
+  localstack:
+    image: localstack/localstack:3.8
+    environment:
+      SERVICES: sqs,dynamodb
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./docker/localstack:/etc/localstack/init/ready.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/recursos-prontos"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  mercado-pago:
+    image: wiremock/wiremock:3.9.1
+    command: ["--global-response-templating", "--disable-banner"]
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./docker/wiremock/mappings:/home/wiremock/mappings:ro
+
+  mailpit:
+    image: axllent/mailpit:v1.20
+    ports:
+      - "8025:8025"
+
+  oficina-execucao:
+    build: ../fiap-15soat-oficina-execucao
+    environment:
+      <<: *aws-local
+      SPRING_PROFILES_ACTIVE: default,simulacao
+      DB_HOST: postgres-execucao
+      DB_PASSWORD: oficina123
+      JWT_ISSUER: http://oficina-local
+      JWT_PUBLIC_KEY: file:/app/keys/sessao.public.key
+      JWT_SERVICO_PUBLIC_KEY: file:/app/keys/servico.public.key
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
+      NEW_RELIC_APP_NAME: oficina-execucao-local
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./.local/chaves:/app/keys:ro
+    healthcheck: *saude
+    depends_on:
+      postgres-execucao: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+
+  oficina-billing:
+    build: ../fiap-15soat-oficina-billing
+    environment:
+      <<: *aws-local
+      SPRING_PROFILES_ACTIVE: default,simulacao
+      DYNAMODB_ENDPOINT: http://localstack:4566
+      MERCADOPAGO_BASE_URL: http://mercado-pago:8080
+      MERCADOPAGO_ACCESS_TOKEN: token-local
+      MERCADOPAGO_EXTERNAL_POS_ID: CAIXA-LOCAL
+      APP_PUBLIC_BASE_URL: http://localhost:8083
+      JWT_ISSUER: http://oficina-local
+      JWT_PUBLIC_KEY: file:/app/keys/sessao.public.key
+      APROVACAO_JWT_PUBLIC_KEY: file:/app/keys/aprovacao.public.key
+      APROVACAO_JWT_PRIVATE_KEY: file:/app/keys/aprovacao.private.key
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: oficina@oficina.local
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
+      NEW_RELIC_APP_NAME: oficina-billing-local
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./.local/chaves:/app/keys:ro
+    healthcheck: *saude
+    depends_on:
+      localstack: { condition: service_healthy }
+      mailpit: { condition: service_started }
+      mercado-pago: { condition: service_started }
+
+  oficina-os:
+    build: .
+    environment:
+      <<: *aws-local
+      DB_HOST: postgres-os
+      DB_PASSWORD: oficina123
+      JWT_ISSUER: http://oficina-local
+      JWT_PUBLIC_KEY: file:/app/keys/sessao.public.key
+      SERVICO_JWT_PUBLIC_KEY: file:/app/keys/servico.public.key
+      SERVICO_JWT_PRIVATE_KEY: file:/app/keys/servico.private.key
+      EXECUCAO_BASE_URL: http://oficina-execucao:8080
+      SAGA_PRAZO_DECISAO: ${SAGA_PRAZO_DECISAO:-P7D}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
+      NEW_RELIC_APP_NAME: oficina-os-local
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./.local/chaves:/app/keys:ro
+    healthcheck: *saude
+    depends_on:
+      postgres-os: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      oficina-execucao: { condition: service_healthy }

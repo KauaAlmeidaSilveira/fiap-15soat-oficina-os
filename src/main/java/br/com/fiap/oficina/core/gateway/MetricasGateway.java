@@ -11,4 +11,8 @@ public interface MetricasGateway {
     void transicaoDeStatus(StatusOS de, StatusOS para, Duration tempoNoStatusAnterior);
 
     void falhaDeIntegracao(String integracao, String motivo);
+
+    void sagaTransicao(String de, String para);
+
+    void eventoForaDeEstado(String tipo, String estado);
 }

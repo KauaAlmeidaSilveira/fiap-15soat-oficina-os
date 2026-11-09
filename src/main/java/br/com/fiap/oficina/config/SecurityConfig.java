@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,22 +41,39 @@ import java.util.List;
 public class SecurityConfig {
 
     static final String AUDIENCIA_SESSAO = "oficina-api";
+    static final String AUDIENCIA_INTERNA = "oficina-os";
+    static final String EMISSOR_LAMBDA = "oficina-lambda-auth";
 
     @Value("${jwt.public.key}")
     private RSAPublicKey publicKey;
-    @Value("${jwt.private.key}")
-    private RSAPrivateKey privateKey;
+    @Value("${servico.jwt.public.key}")
+    private RSAPublicKey chavePublicaServico;
+    @Value("${servico.jwt.private.key}")
+    private RSAPrivateKey chavePrivadaServico;
     @Value("${jwt.issuer}")
     private String issuer;
 
     @Bean
+    @Order(1)
+    SecurityFilterChain internoFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/internal/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(lambdaJwtDecoder(this.publicKey))))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     SecurityFilterChain devFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)) // necessário para H2 Console (usa iframes)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**", "/actuator/health", "/actuator/prometheus", "/aprovacao-os").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**", "/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers("/api/minhas-ordens-servico/**").hasRole("CLIENTE")
                         .requestMatchers("/api/**").hasAnyRole("ADMIN", "RECEPCAO", "OPERADOR")
                         .anyRequest().authenticated())
@@ -76,9 +94,14 @@ public class SecurityConfig {
         return jwtConverter;
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(this.publicKey).build();
+    /** A Lambda assina com a chave de sessão, mas com emissor e audiência próprios: um não vale no lugar do outro. */
+    static JwtDecoder lambdaJwtDecoder(RSAPublicKey publicKey) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withPublicKey(publicKey).build();
+        OAuth2TokenValidator<Jwt> audiencia = new JwtClaimValidator<List<String>>(JwtClaimNames.AUD,
+                aud -> aud != null && aud.contains(AUDIENCIA_INTERNA));
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefaultWithIssuer(EMISSOR_LAMBDA), audiencia));
+        return decoder;
     }
 
     static JwtDecoder sessaoJwtDecoder(RSAPublicKey publicKey, String issuer) {
@@ -93,8 +116,8 @@ public class SecurityConfig {
     @Bean
     public JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey
-                .Builder(this.publicKey)
-                .privateKey(this.privateKey).build();
+                .Builder(this.chavePublicaServico)
+                .privateKey(this.chavePrivadaServico).build();
         var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }

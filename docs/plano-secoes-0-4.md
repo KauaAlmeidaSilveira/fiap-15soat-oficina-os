@@ -1,6 +1,6 @@
 # Plano — Tech Challenge Fase 4, Seções 0 a 4 e higiene
 
-> Estado: **aprovado em 02/11/2026; passo 1 concluído**.
+> Estado: **aprovado em 02/11/2026; passos 1 a 6 implementados e testados localmente em 02/11/2026**. Falta validar com AWS, Mercado Pago e SonarCloud reais (seção 1).
 > Base: `CHECKLIST.md`, PDF do enunciado, código de `fiap-15soat-oficina-api` e `lambda-auth`, documentação do Mercado Pago lida em 02/11/2026.
 > Marcação: **[Dn]** decisão do checklist · **[técnico]** escolha de implementação.
 
@@ -320,3 +320,21 @@ Datas propostas. **Os 15 dias são apertados:** a Saga e o Mercado Pago têm mai
 - [Webhooks](https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks)
 
 As páginas foram lidas por extração automática. Cancelamento (`PUT` ou `POST`), formato da assinatura e resposta do modo dinâmico ainda precisam de conferência na referência da API, durante o passo 0.
+
+## 9. Diferenças entre este plano e o que foi implementado
+
+O plano acima segue como foi aprovado. A implementação mudou estes pontos, sem alterar regra de negócio:
+
+| Plano | Implementado | Motivo |
+|---|---|---|
+| Baixa com `UPDATE ... WHERE quantidade >= :q` | Saldos travados com `PESSIMISTIC_WRITE` e checados antes de movimentar | Mesma garantia; mantém a movimentação como fonte da verdade e responde quais itens faltam |
+| `OrcamentoGerado` com `emailEnviado` | Campo removido | O envio é assíncrono e *best-effort*; a falha vira métrica |
+| Webhook responde 200 ao gravar | Processa antes de responder, e erro vira 5xx | O MP reenvia, e o prazo de 22 s é folgado; dispensa outra fila |
+| Deduplicação gravando o webhook | Escrita condicional no status da cobrança | Repetir o webhook já não tem efeito |
+| `POST /internal/sagas/{id}/reprocessar` | `POST /api/ordens-servico/{id}/saga/reprocessar`, só `ADMIN` | Operador precisa alcançar a rota; rota interna não tem acesso de pessoas |
+| Agendador de prazos com `SKIP LOCKED` | Lista as vencidas, trava cada saga e confere o prazo de novo | Mesma segurança com várias réplicas; `SKIP LOCKED` fica na outbox |
+| Sem rota de consulta da Saga | `GET /api/ordens-servico/{id}/saga` | Necessária para acompanhar respostas 202 e para o vídeo |
+| Interruptor só por variável `SIMULAR_FALHA` | Variável e `PUT /api/simulacao/falha`, no profile `simulacao` | Troca a falha sem reiniciar, nos testes e no vídeo |
+| DataLoader do OS com OS ativas de exemplo | Só OS encerradas | OS ativa sem Saga ficaria presa |
+| F7 por prazo: reembolsar direto | Cancela o reparo antes de reembolsar | Evita item fantasma na fila se o comando atrasado chegar depois |
+| Prazo do orçamento lido do evento | Prazo próprio em `app.saga.prazo-decisao` (padrão 7 dias) | Permite prazo curto no vídeo; quem decide continua sendo o Billing |

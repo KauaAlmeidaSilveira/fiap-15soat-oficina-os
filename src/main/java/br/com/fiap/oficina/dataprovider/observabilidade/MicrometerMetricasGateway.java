@@ -31,4 +31,14 @@ public class MicrometerMetricasGateway implements MetricasGateway {
     public void falhaDeIntegracao(String integracao, String motivo) {
         registry.counter("oficina.integracao.falhas", "integracao", integracao, "motivo", motivo).increment();
     }
+
+    @Override
+    public void sagaTransicao(String de, String para) {
+        registry.counter("oficina.saga.transicoes", "de", de, "para", para).increment();
+    }
+
+    @Override
+    public void eventoForaDeEstado(String tipo, String estado) {
+        registry.counter("oficina.saga.eventos.fora.de.estado", "tipo", tipo, "estado", estado).increment();
+    }
 }

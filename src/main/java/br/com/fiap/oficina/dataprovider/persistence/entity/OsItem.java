@@ -1,7 +1,10 @@
 package br.com.fiap.oficina.dataprovider.persistence.entity;
 
+import br.com.fiap.oficina.core.domain.enums.TipoProduto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,9 +37,16 @@ public class OsItem {
     @JoinColumn(name = "ordem_servico_id", nullable = false)
     private OrdemServico ordemServico;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "produto_id", nullable = false)
-    private Produto produto;
+    // Sem FK: o produto mora no serviço de Execução; o item guarda a cópia do momento da inclusão.
+    @Column(name = "produto_id", nullable = false)
+    private Long produtoId;
+
+    @Column(name = "produto_nome", nullable = false)
+    private String produtoNome;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "produto_tipo", nullable = false)
+    private TipoProduto produtoTipo;
 
     @Column(nullable = false)
     private Integer quantidade;
