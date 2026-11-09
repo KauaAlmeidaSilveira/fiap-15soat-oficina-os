@@ -49,11 +49,11 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 
 ### Por onde retomar
 
-1. **Revisar o que foi feito:** ler os PRs na ordem Execução, Billing e OS. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
-2. **Decidir os PRs do Júlio:** manter ou fechar `infra-k8s` e `infra-db`. O merge deles e o de `lambda-auth` dispara `terraform apply`, então só com a conta AWS definida.
+1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
+2. **PRs de infra (`infra-k8s`, `infra-db`, `lambda-auth`):** aprovados, mas o merge dispara `terraform apply`. O Júlio troca os secrets pelos da conta dele e mergeia na ordem de "Antes de testar na AWS", com `lambda-auth` por último.
 3. **Fazer o merge dos serviços:** Execução, Billing e OS, nessa ordem.
 4. **Liberar o CI:** abrir o PR de `chore/ci` e proteger `main` nos 3 serviços. O escopo `workflow` da conta pessoal já foi liberado e a branch já foi publicada.
-5. **Criar os acessos externos:** SonarCloud, conta AWS (outra conta Academy ou a do Júlio) e conta do Mercado Pago.
+5. **Criar os acessos externos:** SonarCloud, secrets da conta AWS do Júlio (ver "Antes de testar na AWS") e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
 ### Antes de testar na AWS
@@ -66,6 +66,17 @@ Aprovar e mergear os PRs coloca o código em `main`, mas não põe o sistema no 
 - rotas por serviço no API Gateway, com um NLB interno por serviço, em `lambda-auth`;
 - roteiro de deploy: secrets (chaves JWT, banco, SMTP, New Relic, Mercado Pago), build e push das imagens e `kubectl apply`.
 
+**Secrets do GitHub:** os atuais estão expirados. Os testes na AWS usam a conta do Júlio, e os secrets precisam ser trocados pelos dela antes de qualquer merge que dispare `terraform apply`:
+
+| Repositório | Dono | Secrets | Quem pode trocar |
+|---|---|---|---|
+| `infra-k8s` | Júlio | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Júlio |
+| `infra-db` | Júlio | os 3 da AWS e `DB_PASSWORD` | Júlio |
+| `lambda-auth` | Kauã | os 3 da AWS e `JWT_PRIVATE_KEY` | Kauã: o Júlio tem permissão `write`, e secrets exigem `admin` |
+| OS, Billing e Execução (`chore/ci`) | Kauã | `SONAR_TOKEN` (o deploy, quando entrar no workflow, vai pedir também os da AWS) | Kauã: o Júlio tem permissão `read` |
+
+As credenciais do Academy expiram a cada sessão: renovar os secrets a cada retomada (ponto de atenção 1).
+
 **Ordem de merge e `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
 
 **Mercado Pago:** testar a cobrança na AWS exige conta e credenciais de teste do Mercado Pago (Seção 1). Sem elas, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
@@ -73,8 +84,7 @@ Aprovar e mergear os PRs coloca o código em `main`, mas não põe o sistema no 
 ### Decisões em aberto
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
-- **Conta AWS:** outra conta Academy ou a conta do Júlio.
-- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio.
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço).
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -134,8 +144,8 @@ Decisões tomadas pelo Kauã em 02/11/2026. Só a D7 segue em aberto.
 Levantamentos que destravam as decisões:
 
 - [x] Ler o enunciado e comparar com a Fase 3
-- [ ] Validar SQS na conta AWS que for usada (D5) — conta ainda não definida
-- [ ] Validar DynamoDB na conta AWS que for usada (D6) — conta ainda não definida
+- [ ] Validar SQS na conta AWS que for usada (D5) — conta do Júlio
+- [ ] Validar DynamoDB na conta AWS que for usada (D6) — conta do Júlio
 - [x] Ler a [documentação do Mercado Pago (QR dinâmico)](https://www.mercadopago.com.br/developers/pt/docs/qr-code/payment-processing)
 - [x] Criar `docs/requisitos-fase4.md`, espelho em texto do PDF, como a Fase 3 fez
 
