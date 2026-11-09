@@ -12,20 +12,20 @@
 
 **Regra vigente:** avanço sozinho só no desenvolvimento local. Nada de testar em cloud, e push, PR ou merge só com pedido do Kauã.
 
-**Em uma frase:** o código das Seções 0 a 4 está pronto e testado no computador local, mas nada foi mergeado em `main` e nada rodou em ambiente real.
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026; `lambda-auth` e infra estão aprovados e aguardam o `apply` na conta do Júlio. Nada rodou em ambiente real.
 
 ### O que existe hoje
 
 | Repositório | Branch de trabalho | Situação | Testes da última execução local |
 |---|---|---|---|
-| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) aberto, com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
-| `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) aberto | 82 testes, 95,4% de cobertura |
-| `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) aberto, com os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
+| `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) mergeado em 08/11/2026, com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
+| `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) mergeado em 08/11/2026 | 82 testes, 95,4% de cobertura |
+| `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) mergeado em 08/11/2026, com os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
 | `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) aberto | 45 testes; `terraform validate` ok |
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) aberto | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) aberto | `terraform validate` ok |
 
-Os 3 serviços também têm a branch `chore/ci`, publicada no GitHub em 08/11/2026 e sem PR, com o workflow de CI. Ele roda só em PR ou push para `main`, então ainda não rodou. Todo `[x]` de código neste checklist está nessas branches, não em `main`.
+Os 3 serviços também têm a branch `chore/ci`, publicada no GitHub em 08/11/2026 e sem PR, com o workflow de CI. Ele roda só em PR ou push para `main`, então ainda não rodou. O código dos 3 serviços está em `main`; o de `lambda-auth`, `infra-k8s` e `infra-db` segue nas branches dos PRs aprovados.
 
 Para ver o sistema funcionando, a partir de `fiap-15soat-oficina-os`, com o Docker ligado e os repositórios de Execução e Billing na pasta vizinha:
 
@@ -51,14 +51,14 @@ Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`,
 
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra (`infra-k8s`, `infra-db`, `lambda-auth`):** aprovados, mas o merge dispara `terraform apply`. O Júlio troca os secrets pelos da conta dele e mergeia na ordem de "Antes de testar na AWS", com `lambda-auth` por último.
-3. **Fazer o merge dos serviços:** Execução, Billing e OS, nessa ordem.
+3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
 4. **Liberar o CI:** abrir o PR de `chore/ci` e proteger `main` nos 3 serviços. O escopo `workflow` da conta pessoal já foi liberado e a branch já foi publicada.
 5. **Criar os acessos externos:** SonarCloud, secrets da conta AWS do Júlio (ver "Antes de testar na AWS") e conta do Mercado Pago.
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
 ### Antes de testar na AWS
 
-Aprovar e mergear os PRs coloca o código em `main`, mas não põe o sistema no ar. Ainda faltam, nas Seções 5 e 6:
+O código dos serviços já está em `main`, mas isso não põe o sistema no ar. Ainda faltam, nas Seções 5 e 6:
 
 - manifestos Kubernetes dos 3 serviços (`Deployment`, `Service`, `ConfigMap`, `HPA`, probes, requests e limits);
 - ECR por serviço em `infra-k8s` (hoje só `${project_name}-api`);
@@ -104,7 +104,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **147 pendentes, 182 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 08/11/2026: **144 pendentes, 184 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -117,7 +117,7 @@ Contagem de 08/11/2026: **147 pendentes, 182 concluídos, 2 não verificáveis**
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
-| 9. Entregáveis | 37 | Médio |
+| 9. Entregáveis | 34 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -168,9 +168,9 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 | # | Repositório | Papel | Situação |
 |---|---|---|---|
-| 1 | `fiap-15soat-oficina-os` | Abertura, status, histórico, orquestração da Saga, cliente, veículo e usuário | criado; PR #1 aberto |
-| 2 | `fiap-15soat-oficina-billing` | Orçamento, aprovação, pagamento, Mercado Pago | criado; PR #1 aberto |
-| 3 | `fiap-15soat-oficina-execucao` | Fila, diagnóstico, reparo, produto e estoque | criado; PR #1 aberto |
+| 1 | `fiap-15soat-oficina-os` | Abertura, status, histórico, orquestração da Saga, cliente, veículo e usuário | criado; PR #1 mergeado |
+| 2 | `fiap-15soat-oficina-billing` | Orçamento, aprovação, pagamento, Mercado Pago | criado; PR #1 mergeado |
+| 3 | `fiap-15soat-oficina-execucao` | Fila, diagnóstico, reparo, produto e estoque | criado; PR #1 mergeado |
 | 4 | `fiap-15soat-oficina-lambda-auth` | Autenticação e API Gateway | PR #1 tira o acesso ao banco; rotas do Gateway pendentes (Seção 6) |
 | 5 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | VPC, EKS, ECR | PR #1 adiciona as filas; ECR e cluster pendentes (Seção 6) |
 | 6 | `fiap-15soat-oficina-infra-db` (do Júlio) | Bancos gerenciados | PR #1 adiciona o DynamoDB; bancos SQL pendentes (Seção 6) |
@@ -431,7 +431,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 
 | Exigido | OS | Billing | Execução |
 |---|---|---|---|
-| Código-fonte em `main` (hoje em PR) | [ ] | [ ] | [ ] |
+| Código-fonte em `main` (PR #1 mergeado em 08/11/2026) | [x] | [x] | [x] |
 | `Dockerfile` | [x] | [x] | [x] |
 | Manifestos Kubernetes | [ ] | [ ] | [ ] |
 | Pipeline de CI/CD | [ ] | [ ] | [ ] |
