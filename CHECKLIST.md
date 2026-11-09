@@ -77,6 +77,17 @@ Aprovar e mergear os PRs coloca o código em `main`, mas não põe o sistema no 
 
 As credenciais do Academy expiram a cada sessão: renovar os secrets a cada retomada (ponto de atenção 1).
 
+**Roteiro do Júlio (o que dá para fazer sem depender do Kauã):**
+
+1. Renovar as credenciais do Academy e trocar os secrets de `infra-k8s` e `infra-db` pelos da conta dele.
+2. Conferir na conta dele o backend do Terraform: bucket S3 `fiap-15soat-oficina-tfstate` e tabela de lock `fiap-15soat-oficina-tflock`, em `us-east-1`, criados uma vez fora do Terraform (`versions.tf` de `infra-k8s`, `infra-db` e `lambda-auth`). Se não existirem, criar; nome de bucket é global, então, se estiver ocupado por outra conta, trocar o `bucket` nos 3 `versions.tf`.
+3. Mergear `infra-k8s` e acompanhar o `terraform apply`. Numa conta sem nada, ele cria VPC, EKS, ECR e as filas SQS com as DLQs; o EKS demora.
+4. Mergear `infra-db` e acompanhar o `terraform apply`. Ele cria a RDS (que encontra a VPC pelo nome `oficina-vpc`, por isso vem depois) e a tabela DynamoDB `oficina-billing`.
+5. Conferir no console que as 3 filas, as 3 DLQs e a tabela existem, e marcar na Seção 0 a validação de SQS (D5) e DynamoDB (D6) e, nas Seções 2 e 6, os itens "na conta AWS".
+6. Se o Academy bloquear algum recurso (IAM, como na Fase 3), registrar o erro exato neste checklist, em "Pontos de atenção".
+
+Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os databases e as rotas do Gateway são o próximo trabalho (lista acima). O `lambda-auth` não deve ser mergeado antes do deploy dos serviços, e os secrets dele só o Kauã troca.
+
 **Ordem de merge e `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
 
 **Mercado Pago:** testar a cobrança na AWS exige conta e credenciais de teste do Mercado Pago (Seção 1). Sem elas, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
@@ -93,7 +104,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **146 pendentes, 182 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 08/11/2026: **147 pendentes, 182 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -106,7 +117,7 @@ Contagem de 08/11/2026: **146 pendentes, 182 concluídos, 2 não verificáveis**
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
-| 9. Entregáveis | 36 | Médio |
+| 9. Entregáveis | 37 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -436,6 +447,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 - [x] README de `lambda-auth` atualizado
 - [ ] READMEs de `infra-k8s` e `infra-db` atualizados
 - [ ] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3
+- [ ] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`): ainda vem do monólito, com título "Oficina Mecanica API", "Todos os endpoints estao abertos (sem autenticacao nesta versao MVP)" e o H2 Console
 - [ ] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar)
 
 ### Vídeo de demonstração (YouTube/Vimeo, público ou não listado, até 15 minutos)
