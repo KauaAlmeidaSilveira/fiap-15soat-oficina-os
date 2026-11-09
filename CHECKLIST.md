@@ -34,7 +34,9 @@ sh scripts/gerar-chaves-locais.sh
 sh scripts/rodar-bdd.sh   # sobe tudo, roda os 12 cenários e derruba
 ```
 
-Para testar pelo Postman, siga a descrição da collection em `postman/oficina-fase4.collection.json`. A pasta `postman/` fica fora dos repositórios: o enunciado pede "Swagger ou collection Postman" por repositório, e o Swagger já cobre os 3 serviços.
+Para testar pelo Postman, siga a descrição da collection em `fiap-15soat-oficina-os/postman/`. A pasta foi versionada no OS em 08/11/2026, para o Júlio receber pelo git: o environment versionado fica sem tokens, e `postman/gerar-tokens.py` gera o `oficina-fase4.environment.local.json`, ignorado pelo git.
+
+Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhecer as regras de operação, ver o `CLAUDE.md` do repositório do OS.
 
 ### O que os testes provam e o que não provam
 
@@ -95,7 +97,7 @@ Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os da
 ### Decisões em aberto
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
-- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço).
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -439,7 +441,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 | Documentação da arquitetura do serviço | [ ] | [ ] | [ ] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
 | Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
-| Collection Postman atualizada, em `postman/` na pasta da Fase 4 | [x] | [x] | [x] |
+| Collection Postman atualizada, em `postman/` do repositório do OS | [x] | [x] | [x] |
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [ ] | [ ] | [ ] |
 

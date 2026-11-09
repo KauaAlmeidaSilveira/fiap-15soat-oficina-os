@@ -71,3 +71,6 @@ docs/evidencia-colaborador-soat/
 
 # Chaves e artefatos do ambiente local
 .local/
+
+# Environment do Postman com tokens, gerado por postman/gerar-tokens.py
+postman/*.local.json

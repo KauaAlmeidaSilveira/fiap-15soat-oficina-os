@@ -1,0 +1,79 @@
+{
+  "id": "dfefe11c-c0e0-5567-b988-4ec5e4a4b987",
+  "name": "Oficina Fase 4 - Local",
+  "values": [
+    {
+      "key": "url_os",
+      "value": "http://localhost:8081",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "url_execucao",
+      "value": "http://localhost:8082",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "url_billing",
+      "value": "http://localhost:8083",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "url_mercado_pago",
+      "value": "http://localhost:8089",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "url_mailpit",
+      "value": "http://localhost:8025",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "url_auth",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "token_cliente",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "token_lambda",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "token_servico",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "cliente_id",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "veiculo_id",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
