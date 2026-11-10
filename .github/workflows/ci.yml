@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Build, testes e cobertura
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Gerar chaves de teste
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out src/main/resources/jwt.private.key
+          openssl rsa -in src/main/resources/jwt.private.key -pubout -out src/main/resources/jwt.public.key
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out src/main/resources/servico.private.key
+          openssl rsa -in src/main/resources/servico.private.key -pubout -out src/main/resources/servico.public.key
+
+      - name: Build, testes e gate de 80%
+        run: mvn -B verify
+
+      - name: SonarCloud
+        if: env.SONAR_TOKEN != ''
+        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
+  bdd:
+    name: BDD com o sistema inteiro
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: fiap-15soat-oficina-os
+
+      - uses: actions/checkout@v4
+        with:
+          repository: KauaAlmeidaSilveira/fiap-15soat-oficina-execucao
+          path: fiap-15soat-oficina-execucao
+
+      - uses: actions/checkout@v4
+        with:
+          repository: KauaAlmeidaSilveira/fiap-15soat-oficina-billing
+          path: fiap-15soat-oficina-billing
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: fiap-15soat-oficina-os/pom.xml
+
+      - name: Cucumber contra o docker-compose
+        working-directory: fiap-15soat-oficina-os
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out src/main/resources/jwt.private.key
+          openssl rsa -in src/main/resources/jwt.private.key -pubout -out src/main/resources/jwt.public.key
+          cp src/main/resources/jwt.public.key src/main/resources/servico.public.key
+          cp src/main/resources/jwt.private.key src/main/resources/servico.private.key
+          sh scripts/rodar-bdd.sh
