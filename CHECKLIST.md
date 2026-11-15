@@ -44,7 +44,7 @@ Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhec
 - **Simulado:** SQS e DynamoDB no LocalStack, Mercado Pago no WireMock e e-mail no Mailpit.
 - **Testado na AWS em 15/11/2026:** fluxo feliz completo, com Lambda, Gateway, RDS, SQS, DynamoDB, Pod Identity, HPA, Gmail e a API real do Mercado Pago (QR, pagamento aprovado e webhook).
 - **Nunca testado em ambiente real:** compensações na AWS, pagamento recusado, QR expirado e cancelamento da cobrança no Mercado Pago, CI e SonarCloud.
-- **Suposições do Mercado Pago:** `qr_data` e assinatura conferidos em 15/11/2026 (a assinatura usa o id da order na grafia original; corrigido). Faltam o método de cancelamento e o status de pagamento recusado.
+- **Suposições do Mercado Pago:** `qr_data` e assinatura conferidos em 15/11/2026 (a assinatura usa o id da order na grafia original; corrigido). Método de cancelamento e status de pagamento recusado ficam opcionais (não exigidos; cobertos contra o WireMock).
 
 ### Ações na nuvem já feitas
 
@@ -70,7 +70,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. Falta o SonarCloud.
-6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Faltam, na próxima subida, as compensações pela AWS, pagamento recusado, QR expirado e cancelamento da cobrança.
+6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
 7. **Próximos passos:** documentação (Seção 8), SonarCloud e a gravação do vídeo numa nova subida.
 
 ### Ambiente na AWS
@@ -129,12 +129,12 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **94 pendentes, 240 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **90 pendentes, 241 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
 | 0. Decisões em aberto | 1 | Pequeno, mas trava o resto |
-| 1. Separação em Microsserviços | 4 | **Muito grande** |
+| 1. Separação em Microsserviços | 0 | **Muito grande** |
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 5 | Grande |
@@ -246,15 +246,14 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 - [x] Receber webhook em rota pública do API Gateway — validado na AWS em 15/11/2026: notificação do painel (Modo de teste) chegou ao Billing pelo Gateway
 - [x] Validar a autenticidade do webhook conforme a documentação (`AssinaturaWebhook`)
 - [x] Conferir o formato da assinatura com um webhook real — validado na AWS em 15/11/2026: o Mercado Pago assina o `data.id` da order na grafia original, não em minúsculas; corrigido no Billing (aceita as duas) e sem `request-id` o manifesto omite a parte
-- [ ] Conferir o cancelamento da cobrança com conta real
 - [x] Tratar webhook repetido sem duplicar pagamento
 - [x] Consultar o status na API do Mercado Pago, sem confiar só no corpo do webhook
 - [x] Testar pagamento aprovado e QR expirado no BDD, contra o simulador (D2)
 - [x] Testar pagamento recusado em teste de unidade do Billing, sem cenário BDD próprio
+**Opcionais, não exigidos pelo enunciado** (decidido em 15/11/2026: o PDF pede a integração com o Mercado Pago, já validada na AWS; estes caminhos estão cobertos contra o WireMock no BDD e na collection, e cancelamento e QR expirado aparecem nas compensações F6, F7, F9 e F10): cancelamento da cobrança, pagamento recusado e QR expirado com conta real de teste.
+
 - [x] Testar pagamento aprovado com conta real de teste — validado na AWS em 15/11/2026: conta compradora de teste pagou pelo app, order `processed/accredited`, cobrança `PAGA`, Saga até `CONCLUIDA` e OS `ENTREGUE`
-- [ ] Testar pagamento recusado com conta real de teste
-- [ ] Testar QR expirado com conta real de teste (D2)
-- [ ] Webhook de order inexistente responde 500 (o Billing propaga o 404 do Mercado Pago), e o Mercado Pago reenvia; responder 200 com aviso no log — achado em 15/11/2026
+- [x] Webhook de order inexistente responde 500 (o Billing propaga o 404 do Mercado Pago), e o Mercado Pago reenvia; responder 200 com aviso no log — achado e corrigido em 15/11/2026: o 404 vira `OrderNaoEncontradaException` e a notificação é ignorada; falha temporária continua 500, para o Mercado Pago reenviar
 
 ### Execução e Produção
 
