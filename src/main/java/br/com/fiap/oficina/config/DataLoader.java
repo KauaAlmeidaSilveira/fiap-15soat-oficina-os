@@ -16,6 +16,7 @@ import br.com.fiap.oficina.dataprovider.persistence.repository.UserRepository;
 import br.com.fiap.oficina.dataprovider.persistence.repository.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +40,10 @@ public class DataLoader {
             ClienteVeiculoRepository cvRepo,
             OrdemServicoRepository osRepo,
             UserRepository userRepo,
-            RoleRepository roleRepo) {
+            RoleRepository roleRepo,
+            @Value("${app.demonstracao.senha-admin}") String senhaAdmin,
+            @Value("${app.demonstracao.senha-recepcao}") String senhaRecepcao,
+            @Value("${app.demonstracao.senha-operador}") String senhaOperador) {
 
         return args -> {
             if (clienteRepo.count() > 0) {
@@ -64,21 +68,21 @@ public class DataLoader {
             // --- Usuário admin (dono / gerente) ---
             User admin = new User();
             admin.setUsername("kaua@gmail.com");
-            admin.setPassword(new BCryptPasswordEncoder().encode("Admin@123"));
+            admin.setPassword(new BCryptPasswordEncoder().encode(senhaAdmin));
             admin.setRoles(Set.of(roleAdmin));
             admin = userRepo.save(admin);
 
             // --- Usuário recepcionista de exemplo ---
             User recepcao = new User();
             recepcao.setUsername("recepcao@oficina.com");
-            recepcao.setPassword(new BCryptPasswordEncoder().encode("Recepcao@123"));
+            recepcao.setPassword(new BCryptPasswordEncoder().encode(senhaRecepcao));
             recepcao.setRoles(Set.of(roleRecepcao));
             userRepo.save(recepcao);
 
             // --- Usuário operador de exemplo ---
             User operador = new User();
             operador.setUsername("operador@oficina.com");
-            operador.setPassword(new BCryptPasswordEncoder().encode("Operador@123"));
+            operador.setPassword(new BCryptPasswordEncoder().encode(senhaOperador));
             operador.setRoles(Set.of(roleOperador));
             userRepo.save(operador);
 
