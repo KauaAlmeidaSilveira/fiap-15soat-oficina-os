@@ -1,0 +1,25 @@
+# Valores ${...} sao preenchidos pelo scripts/deploy-aws.sh do repositorio do OS (envsubst).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oficina-os-config
+  namespace: oficina
+data:
+  SPRING_PROFILES_ACTIVE: "default"
+  # Endpoint da RDS (terraform output rds_endpoint em infra-db).
+  DB_HOST: "${DB_HOST}"
+  DB_NAME: "oficina_os"
+  DB_USER: "oficina_os"
+  # Token de sessao emitido pela Lambda.
+  JWT_PUBLIC_KEY: "file:/app/keys/sessao.public.key"
+  # URL do API Gateway (terraform output api_gateway_url em lambda-auth).
+  JWT_ISSUER: "${JWT_ISSUER}"
+  SERVICO_JWT_PUBLIC_KEY: "file:/app/keys/servico.public.key"
+  # Assina as chamadas internas OS -> Execucao.
+  SERVICO_JWT_PRIVATE_KEY: "file:/app/keys/servico.private.key"
+  # Service da Execucao no mesmo namespace (porta 80).
+  EXECUCAO_BASE_URL: "http://oficina-execucao"
+  AWS_REGION: "us-east-1"
+  NEW_RELIC_APP_NAME: "oficina-os"
+  # Os logs JSON chegam ao New Relic pelo nri-bundle (stdout); o forwarding do agente duplicaria.
+  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED: "false"

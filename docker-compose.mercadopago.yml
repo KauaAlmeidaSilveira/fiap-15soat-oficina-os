@@ -1,0 +1,10 @@
+# Aponta o Billing para a API real do Mercado Pago (credenciais de teste), no lugar do WireMock.
+# Uso: docker compose -f docker-compose.yml -f docker-compose.mercadopago.yml up -d --build --wait
+# Os valores vêm do .env (ver .env.example). Sem este arquivo, o compose e o BDD seguem no WireMock.
+services:
+  oficina-billing:
+    environment:
+      MERCADOPAGO_BASE_URL: ${MERCADOPAGO_BASE_URL:-https://api.mercadopago.com}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:?defina MERCADOPAGO_ACCESS_TOKEN no .env}
+      MERCADOPAGO_EXTERNAL_POS_ID: ${MERCADOPAGO_EXTERNAL_POS_ID:?defina MERCADOPAGO_EXTERNAL_POS_ID no .env}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET:-}

@@ -11,7 +11,7 @@ Não impedem o desenvolvimento: até lá, LocalStack substitui SQS e DynamoDB, e
 | # | Bloqueio | Situação | Quem resolve |
 |---|---|---|---|
 | B1 | SQS e DynamoDB na conta AWS (D5, D6) | **Pendente:** ainda sem conta definida (outra conta Academy ou conta do Júlio) | Kauã e Júlio |
-| B2 | Conta de teste do Mercado Pago | **Pendente:** depende de conta, loja, caixa (`external_pos_id` é obrigatório) e do app no celular com a conta compradora | Kauã |
+| B2 | Conta de teste do Mercado Pago | **Parcial (15/11/2026):** conta vendedora de teste, loja e caixa (`OFICINACAIXA1`) criados pelo Júlio; falta a conta compradora no app do celular | Júlio |
 
 D7 (cluster compartilhado) não bloqueia estas seções, porque o desenho funciona nos dois modelos.
 
