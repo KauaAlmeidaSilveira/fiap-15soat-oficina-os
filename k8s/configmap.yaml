@@ -21,5 +21,8 @@ data:
   EXECUCAO_BASE_URL: "http://oficina-execucao"
   AWS_REGION: "us-east-1"
   NEW_RELIC_APP_NAME: "oficina-os"
-  # Os logs JSON chegam ao New Relic pelo nri-bundle (stdout); o forwarding do agente duplicaria.
-  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED: "false"
+  # Logs enviados pelo proprio agente, com trace.id e span.id (logs in context): o nri-bundle nao sobe no
+  # node de 1 vCPU. Se ele voltar a ser instalado, desligar aqui para nao duplicar.
+  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED: "true"
+  # Leva o MDC (correlationId, sagaId) como atributos context.* do Log: busca por OS ou Saga no New Relic.
+  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_CONTEXT_DATA_ENABLED: "true"

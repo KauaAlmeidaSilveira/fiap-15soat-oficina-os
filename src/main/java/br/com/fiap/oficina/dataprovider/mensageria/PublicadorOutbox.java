@@ -1,5 +1,6 @@
 package br.com.fiap.oficina.dataprovider.mensageria;
 
+import br.com.fiap.oficina.dataprovider.observabilidade.EventosNewRelic;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = "app.mensageria.habilitada", havingValue = "true")
@@ -26,6 +28,8 @@ public class PublicadorOutbox {
             sqsTemplate.send(mensagem.getFila(), mensagem.getCorpo());
             mensagem.setPublicadoEm(Instant.now());
             log.info("Mensagem {} ({}) publicada na fila {}", mensagem.getId(), mensagem.getTipo(), mensagem.getFila());
+            EventosNewRelic.registrar("OficinaMensagemPublicada",
+                    Map.of("servico", "os", "tipo", mensagem.getTipo(), "fila", mensagem.getFila()));
         }
     }
 }
