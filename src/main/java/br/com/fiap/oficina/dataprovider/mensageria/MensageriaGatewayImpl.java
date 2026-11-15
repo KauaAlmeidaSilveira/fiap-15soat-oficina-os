@@ -35,7 +35,7 @@ public class MensageriaGatewayImpl implements MensageriaGateway {
         Instant agora = Instant.now();
         UUID id = UUID.randomUUID();
         Envelope envelope = new Envelope(id, tipo, 1, contexto.sagaId(), contexto.osId(), contexto.correlationId(),
-                contexto.causationId(), agora, objectMapper.valueToTree(payload));
+                contexto.causationId(), agora, objectMapper.valueToTree(payload), RastreioDistribuido.capturar());
         try {
             outboxRepository.save(OutboxMensagem.builder()
                     .id(id)
