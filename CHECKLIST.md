@@ -12,7 +12,7 @@
 
 **Regra vigente:** avanço sozinho só no desenvolvimento local. Nada de testar em cloud, e push, PR ou merge só com pedido do Kauã.
 
-**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Em 15/11/2026 ficaram escritos, em branches locais, os manifestos, a infraestrutura da conta pessoal e os scripts de subir, publicar e destruir (ver "Antes de testar na AWS"). Nada rodou em ambiente real.
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Em 15/11/2026 ficaram escritos, em branches locais, os manifestos, a infraestrutura da conta pessoal e os scripts de subir, publicar e destruir (ver "Antes de testar na AWS"). Na primeira subida, em 15/11/2026, o node group do EKS não subiu: a conta nova tem cota de 1 vCPU on-demand e a AWS negou o aumento para 8 (caso 179476836800116).
 
 ### O que existe hoje
 
@@ -117,7 +117,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **116 pendentes, 214 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **113 pendentes, 217 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -127,10 +127,10 @@ Contagem de 15/11/2026: **116 pendentes, 214 concluídos, 0 não verificáveis**
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
-| 6. Infraestrutura | 10 | Grande |
-| 7. Monitoramento e Observabilidade | 12 | Médio |
+| 6. Infraestrutura | 9 | Grande |
+| 7. Monitoramento e Observabilidade | 11 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
-| 9. Entregáveis | 30 | Médio |
+| 9. Entregáveis | 29 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -380,7 +380,7 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 - [x] Criar um NLB interno e integração por serviço — o NLB vem do `Service` de cada `k8s/`
 - [x] Mover a rota pública `/aprovacao-os` para o Billing
 - [x] Criar a rota pública do webhook do Mercado Pago — `POST /webhooks/mercado-pago`
-- [ ] Revisar `iss`, `aud` e distribuição da chave pública nos 3 serviços
+- [x] Revisar `iss`, `aud` e distribuição da chave pública nos 3 serviços — revisado em 15/11/2026, sem mudança: o `iss` da sessão é o `api_endpoint` do Gateway nos dois lados (Lambda e `JWT_ISSUER`), `aud` `oficina-api`; o token interno da Lambda usa `oficina-lambda-auth`/`oficina-os`, e o de serviço, `oficina-os`/`oficina-execucao`
 
 ### Por serviço
 
@@ -414,7 +414,7 @@ O enunciado pede o uso das ferramentas já implementadas na Fase 3: **New Relic*
 Execução não tem métrica própria, e as métricas do monólito ficaram no OS e no Billing. Falta decidir se ela precisa de alguma. O Billing só tem `oficina.integracao.falhas`, então o painel de pagamentos vai exigir métricas novas.
 
 - [x] Propagar `X-Correlation-Id` na chamada REST OS → Execução
-- [ ] Propagar `X-Correlation-Id` na chamada REST Lambda → OS — o handler lê o cabeçalho, mas `src/repositorio.js` não o repassa
+- [x] Propagar `X-Correlation-Id` na chamada REST Lambda → OS — em 15/11/2026, por `AsyncLocalStorage` (`src/correlacao.js`); a Lambda gera o id quando não vem e o devolve na resposta (branch `fix/repassar-correlation-id`)
 - [x] Propagar correlação e ID da Saga nas mensagens — `Envelope` e `MDC` nos listeners
 - [ ] Trace distribuído visível de ponta a ponta, atravessando o broker
 - [ ] Adaptar os dashboards de `observability/`, hoje amarrados ao `oficina-api`
@@ -460,7 +460,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 - [x] README de `lambda-auth` atualizado
 - [x] READMEs de `infra-k8s` e `infra-db` atualizados — e o de `lambda-auth`, para a Fase 4
 - [ ] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3
-- [ ] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`): ainda vem do monólito, com título "Oficina Mecanica API", "Todos os endpoints estao abertos (sem autenticacao nesta versao MVP)" e o H2 Console
+- [x] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`) — em 15/11/2026: título e papel de cada serviço, autenticação por Bearer JWT com botão Authorize, versão 4.0.0 (branches `fix/descricao-swagger`)
 - [ ] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar)
 
 ### Vídeo de demonstração (YouTube/Vimeo, público ou não listado, até 15 minutos)
