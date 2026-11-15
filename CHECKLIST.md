@@ -12,7 +12,7 @@
 
 **Regra vigente:** avanço sozinho só no desenvolvimento local. Nada de testar em cloud, e push, PR ou merge só com pedido do Kauã.
 
-**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Nada rodou em ambiente real.
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Em 15/11/2026 ficaram escritos, em branches locais, os manifestos, a infraestrutura da conta pessoal e os scripts de subir, publicar e destruir (ver "Antes de testar na AWS"). Nada rodou em ambiente real.
 
 ### O que existe hoje
 
@@ -64,22 +64,21 @@ No mesmo dia, o Júlio recebeu `write` nos 4 repositórios do Kauã e mergeou o 
 
 ### Antes de testar na AWS
 
-O código dos serviços já está em `main`, mas isso não põe o sistema no ar. Ainda faltam, nas Seções 5 e 6:
+Escrito em 15/11/2026, ainda nunca aplicado (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`; no OS, `feat/deploy-aws`):
 
-- manifestos Kubernetes dos 3 serviços (`Deployment`, `Service`, `ConfigMap`, `HPA`, probes, requests e limits);
-- ECR por serviço em `infra-k8s` (hoje só `${project_name}-api`);
-- databases `oficina_os` e `oficina_execucao` na RDS, com usuário próprio por serviço;
-- rotas por serviço no API Gateway, com um NLB interno por serviço, em `lambda-auth`;
-- roteiro de deploy: secrets (chaves JWT, banco, SMTP, New Relic, Mercado Pago), build e push das imagens e `kubectl apply`.
+- `k8s/` nos 3 serviços: `Namespace`, `ServiceAccount`, `ConfigMap`, `Deployment` (probes, requests e limits), `Service` LoadBalancer com NLB interno e `HPA`; `.dockerignore` para chaves e `.env` não entrarem na imagem;
+- `infra-k8s`: roles do cluster e dos nodes, uma role por serviço pelo EKS Pod Identity (cada uma só com as próprias filas e, no Billing, a tabela), ECR por serviço com `force_delete`, nodes ARM `t4g.medium` (imagem construída sem emulação nos Macs);
+- `infra-db`: senhas por serviço e `scripts/criar-databases.sh`, que cria `oficina_os` e `oficina_execucao` com usuário dono só do próprio database, por um pod de `psql` (a RDS é privada);
+- `lambda-auth`: role própria da Lambda, um NLB e uma integração por serviço, rotas por prefixo, `/aprovacao-os` e `/webhooks/mercado-pago` públicas no Billing;
+- OS: `scripts/aws-bootstrap.sh` (bucket do state, lock e Budget, uma vez), `scripts/subir-aws.sh` (tudo, na ordem), `scripts/deploy-aws.sh` (testes, imagem, ECR, Secrets e manifestos) e `scripts/destruir-aws.sh` (ordem inversa, NLBs antes).
 
 **Conta AWS pessoal (decidido em 14/11/2026):** os testes e o vídeo usam a conta pessoal do Júlio, não o Academy. O ambiente sobe para testar e é destruído logo depois; sobe de novo para gravar o vídeo e é destruído de novo. Antes do primeiro `apply`, falta:
 
-- criar as roles IAM no Terraform no lugar da `LabRole`, que só existe no Academy: cluster e node group em `infra-k8s/eks.tf`, Lambda em `lambda-auth/terraform/lambda.tf`;
-- configurar o profile `personal` do AWS CLI na máquina do Júlio e rodar tudo com `AWS_PROFILE=personal`, conferindo `aws sts get-caller-identity` antes de cada `apply` (há profiles de trabalho na mesma máquina);
+- configurar o profile `personal` do AWS CLI na máquina do Júlio e rodar tudo com `AWS_PROFILE=personal-tf` (profile com `credential_process` em cima da sessão do `aws login --profile personal`, que o Terraform não lê), conferindo `aws sts get-caller-identity` antes de cada `apply` (há profiles de trabalho na mesma máquina);
 - usar Terraform 1.9.8, a versão dos workflows, e Node 22 (`.nvmrc` do `lambda-auth`);
-- `force_delete` no ECR, porque o `destroy` falha com imagens no repositório;
-- um caminho de `destroy` na ordem inversa, apagando antes os `Service`s do tipo LoadBalancer: os NLBs são criados pelo Kubernetes e, se ficarem órfãos, travam o `destroy` da VPC e continuam cobrando;
-- bucket de state, tabela de lock e um AWS Budget com alerta, criados uma vez e mantidos entre as subidas;
+- rodar `scripts/aws-bootstrap.sh` uma vez (bucket de state, tabela de lock e AWS Budget com alerta);
+- preencher no `.env` do OS o `NEW_RELIC_LICENSE_KEY` e o Gmail do envio de e-mail (`GMAIL_SMTP_USERNAME` e `GMAIL_SMTP_PASSWORD`, uma senha de app); sem o Gmail, orçamento e QR não chegam ao cliente;
+- a sessão do profile `personal` é do usuário root da conta: preferir um usuário ou role IAM com permissão de administrador;
 
 **Secrets do GitHub:** os atuais são do Academy e estão expirados. Com o Actions fora, não são usados; ficam registrados para o caso de ele voltar:
 
@@ -93,14 +92,14 @@ O código dos serviços já está em `main`, mas isso não põe o sistema no ar.
 **Roteiro do Júlio (o que dá para fazer sem depender do Kauã):**
 
 1. Fazer as adaptações da conta pessoal listadas acima.
-2. Conferir na conta dele o backend do Terraform: bucket S3 `fiap-15soat-oficina-tfstate` e tabela de lock `fiap-15soat-oficina-tflock`, em `us-east-1`, criados uma vez fora do Terraform (`versions.tf` de `infra-k8s`, `infra-db` e `lambda-auth`). Se não existirem, criar; nome de bucket é global, então, se estiver ocupado por outra conta, trocar o `bucket` nos 3 `versions.tf`.
+2. Conferir na conta dele o backend do Terraform: bucket S3 `fiap-15soat-oficina-fase4-tfstate` e tabela de lock `fiap-15soat-oficina-tflock`, em `us-east-1`, criados uma vez fora do Terraform por `scripts/aws-bootstrap.sh` (`versions.tf` de `infra-k8s`, `infra-db` e `lambda-auth`). O nome antigo `fiap-15soat-oficina-tfstate` está ocupado por outra conta (Academy).
 3. Rodar `terraform plan` e `terraform apply` de `infra-k8s` na máquina dele (o código já está em `main`). Numa conta sem nada, ele cria VPC, EKS, ECR e as filas SQS com as DLQs; o EKS demora.
 4. Rodar `terraform plan` e `terraform apply` de `infra-db`. Ele cria a RDS (que encontra a VPC pelo nome `oficina-vpc`, por isso vem depois) e a tabela DynamoDB `oficina-billing`.
 5. Conferir no console que as 3 filas, as 3 DLQs e a tabela existem, e marcar na Seção 0 a validação de SQS (D5) e DynamoDB (D6) e, nas Seções 2 e 6, os itens "na conta AWS".
 6. Se algum recurso falhar, registrar o erro exato neste checklist, em "Pontos de atenção".
 7. Destruir tudo ao terminar, na ordem inversa, e conferir no console que não sobrou NLB, NAT Gateway nem EKS.
 
-Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os databases e as rotas do Gateway são o próximo trabalho (lista acima). O `apply` do `lambda-auth` só vem depois do deploy dos serviços.
+Com as branches acima, `AWS_PROFILE=personal-tf sh scripts/subir-aws.sh` faz os passos 3 e 4, cria os databases, instala o New Relic, faz o deploy, aplica o `lambda-auth` e faz o segundo deploy; `scripts/destruir-aws.sh` faz o passo 7. O build da imagem em ARM ainda não foi conferido (o Docker estava desligado).
 
 **Ordem de `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
 
@@ -118,7 +117,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **139 pendentes, 191 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **116 pendentes, 214 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -128,10 +127,10 @@ Contagem de 15/11/2026: **139 pendentes, 191 concluídos, 0 não verificáveis**
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
-| 6. Infraestrutura | 29 | Grande |
+| 6. Infraestrutura | 10 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
-| 9. Entregáveis | 34 | Médio |
+| 9. Entregáveis | 30 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -361,26 +360,26 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 
 ### `infra-k8s`
 
-- [ ] ECR por serviço (hoje há só `${project_name}-api`)
-- [ ] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (hoje 2 nós `t3.medium`, máximo 3)
+- [x] ECR por serviço — `ecr.tf`, com `force_delete` (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
+- [ ] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (2 nós `t4g.medium`, máximo 3; requests de 250m e 384Mi por serviço)
 - [x] Escrever broker e demais recursos no repositório escolhido (D5) — `sqs.tf`, em `main` desde 14/11/2026
 - [ ] Aplicar broker e demais recursos na conta AWS (D5)
 - [ ] Confirmar o modelo de cluster com o professor (D7)
 
 ### `infra-db`
 
-- [ ] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — hoje há uma só instância `aws_db_instance`; decidido em 08/11/2026: a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço
+- [x] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço, criados por `scripts/criar-databases.sh` (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
 - [ ] Provisionar os bancos SQL na conta AWS (D6)
 - [x] Escrever o banco NoSQL (D6) — `dynamodb.tf`, em `main` desde 14/11/2026
 - [ ] Provisionar o banco NoSQL na conta AWS (D6)
-- [ ] Restringir as credenciais: cada serviço só alcança o próprio banco
+- [x] Restringir as credenciais: cada serviço só alcança o próprio banco — usuário dono só do próprio database e, no Billing, role do Pod Identity só com a tabela (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
 
 ### `lambda-auth` (API Gateway)
 
-- [ ] Trocar a rota única `ANY /api/{proxy+}` por rotas para cada serviço
-- [ ] Criar um NLB interno e integração por serviço
-- [ ] Mover a rota pública `/aprovacao-os` para o Billing
-- [ ] Criar a rota pública do webhook do Mercado Pago
+- [x] Trocar a rota única `ANY /api/{proxy+}` por rotas para cada serviço (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
+- [x] Criar um NLB interno e integração por serviço — o NLB vem do `Service` de cada `k8s/`
+- [x] Mover a rota pública `/aprovacao-os` para o Billing
+- [x] Criar a rota pública do webhook do Mercado Pago — `POST /webhooks/mercado-pago`
 - [ ] Revisar `iss`, `aud` e distribuição da chave pública nos 3 serviços
 
 ### Por serviço
@@ -388,11 +387,11 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 | Item | OS | Billing | Execução |
 |---|---|---|---|
 | `Dockerfile` | [x] | [x] | [x] |
-| `Deployment`, `Service`, `ConfigMap` | [ ] | [ ] | [ ] |
-| `HPA` | [ ] | [ ] | [ ] |
+| `Deployment`, `Service`, `ConfigMap` | [x] | [x] | [x] |
+| `HPA` | [x] | [x] | [x] |
 | Health check (probes do Actuator habilitadas) | [x] | [x] | [x] |
-| Health check, requests e limits nos manifestos | [ ] | [ ] | [ ] |
-| Secrets e permissão de IAM para fila e banco | [ ] | [ ] | [ ] |
+| Health check, requests e limits nos manifestos | [x] | [x] | [x] |
+| Secrets e permissão de IAM para fila e banco | [x] | [x] | [x] |
 | `docker-compose` local com dependências | [x] | [ ] | [ ] |
 
 Billing e Execução não têm `docker-compose` próprio: sobem pelo do OS, e seus testes usam Testcontainers. Se isso bastar, as duas linhas podem sair.
@@ -447,7 +446,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 |---|---|---|---|
 | Código-fonte em `main` (PR #1 mergeado em 08/11/2026) | [x] | [x] | [x] |
 | `Dockerfile` | [x] | [x] | [x] |
-| Manifestos Kubernetes | [ ] | [ ] | [ ] |
+| Manifestos Kubernetes | [x] | [x] | [x] |
 | Pipeline de CI/CD | [ ] | [ ] | [ ] |
 | Evidência de cobertura no README (print ou link) | [ ] | [ ] | [ ] |
 | Documentação da arquitetura do serviço | [ ] | [ ] | [ ] |
@@ -459,7 +458,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
-- [ ] READMEs de `infra-k8s` e `infra-db` atualizados
+- [x] READMEs de `infra-k8s` e `infra-db` atualizados — e o de `lambda-auth`, para a Fase 4
 - [ ] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3
 - [ ] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`): ainda vem do monólito, com título "Oficina Mecanica API", "Todos os endpoints estao abertos (sem autenticacao nesta versao MVP)" e o H2 Console
 - [ ] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar)

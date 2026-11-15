@@ -36,7 +36,9 @@ pedido explícito de quem está operando.
 
 - **GitHub Actions bloqueado** por billing nas contas do Kauã e do Júlio (decidido em 14/11/2026 seguir sem
   ele). Nenhum workflow roda: build, testes, `terraform apply` e deploy são manuais, da máquina do Júlio.
-- **AWS é a conta pessoal do Júlio**, não o Academy. Rodar sempre com `AWS_PROFILE=personal` e conferir
+- **AWS é a conta pessoal do Júlio**, não o Academy. Login com `aws login --profile personal`; rodar scripts e Terraform com `AWS_PROFILE=personal-tf`
+  (profile com `credential_process = aws configure export-credentials --profile personal --format process`,
+  porque o Terraform não lê a sessão do `aws login`) e conferir
   `aws sts get-caller-identity` antes de qualquer `apply`: há profiles de trabalho na mesma máquina.
   O ambiente sobe para testar ou gravar e é destruído logo depois; nada fica ligado sem uso.
 - Ordem de `apply`: `infra-k8s` → `infra-db` → deploy dos serviços → `lambda-auth`. Destruir na ordem
