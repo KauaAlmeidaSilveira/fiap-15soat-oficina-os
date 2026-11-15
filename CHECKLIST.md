@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **85 pendentes, 246 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **81 pendentes, 246 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -139,7 +139,7 @@ Contagem de 15/11/2026: **85 pendentes, 246 concluídos, 0 não verificáveis**.
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
-| 6. Infraestrutura | 5 | Grande |
+| 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
 | 9. Entregáveis | 29 | Médio |
@@ -406,13 +406,13 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 | Health check (probes do Actuator habilitadas) | [x] | [x] | [x] |
 | Health check, requests e limits nos manifestos | [x] | [x] | [x] |
 | Secrets e permissão de IAM para fila e banco | [x] | [x] | [x] |
-| `docker-compose` local com dependências | [x] | [ ] | [ ] |
 
-Billing e Execução não têm `docker-compose` próprio: sobem pelo do OS, e seus testes usam Testcontainers. Se isso bastar, as duas linhas podem sair.
+`docker-compose` local com dependências: um só, no OS, sobe o sistema inteiro (os 3 serviços, PostgreSQL, LocalStack, WireMock e Mailpit). Billing e Execução não têm compose próprio de propósito: rodam por esse e, nos testes, usam Testcontainers (decidido em 15/11/2026; a linha da tabela saiu).
 
 - [x] `docker-compose` que suba o sistema inteiro localmente — em `fiap-15soat-oficina-os`
-- [ ] Probes em `/actuator/health/liveness` e `/readiness` (hoje usam o health completo, que inclui dependências externas; o SMTP já foi tirado no ConfigMap do Billing), liberando as rotas no `SecurityConfig` — achado em 15/11/2026
-- [ ] Ajustar o CI que tem `oficina-db` fixo no `aws rds wait` — está na pipeline do monólito; vale para o deploy dos serviços novos
+
+Não se aplica mais (decidido em 15/11/2026): o `aws rds wait` com `oficina-db` fixo era da pipeline do monólito (`fiap-15soat-oficina-api`). Os serviços da Fase 4 não esperam a RDS no CI; o deploy (`scripts/deploy-aws.sh`) lê o endpoint do output do `infra-db`.
+- [x] Probes em `/actuator/health/liveness` e `/readiness` — achado em 15/11/2026 (as probes usavam o health completo, com dependências externas, e o SMTP sem credencial derrubava o Billing). Corrigido no mesmo dia: startup e liveness em `/actuator/health/liveness`, readiness em `/actuator/health/readiness`, rotas liberadas no `SecurityConfig` dos 3 serviços e cobertas por `ProbesKubernetesIT`
 - [x] Atualizar o bucket de state e as chaves do Terraform para os recursos novos — validado na AWS em 15/11/2026: bucket `fiap-15soat-oficina-fase4-tfstate` (o nome antigo é de outra conta), criado por `aws-bootstrap.sh`
 
 ## 7. Monitoramento e Observabilidade
