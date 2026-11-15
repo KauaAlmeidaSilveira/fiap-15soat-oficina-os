@@ -4,7 +4,8 @@
 # Leva cerca de 30 minutos (o EKS sozinho passa de 10). Destruir com scripts/destruir-aws.sh.
 #
 # Uso: AWS_PROFILE=personal-tf sh scripts/subir-aws.sh
-# Variaveis opcionais: SEM_TESTES=1 (repassada ao deploy), NEW_RELIC_LICENSE_KEY no .env (instala o nri-bundle).
+# Variaveis opcionais: SEM_TESTES=1 (repassada ao deploy), NEW_RELIC_LICENSE_KEY no .env (instala o nri-bundle),
+# SEM_NRI_BUNDLE=1 (nao instala o nri-bundle: com um node de 1 vCPU ele nao cabe; o APM dos servicos continua).
 set -eu
 
 OS_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -43,7 +44,7 @@ aws eks update-kubeconfig --region us-east-1 \
   --name "$(terraform -chdir="$RAIZ/fiap-15soat-oficina-infra-k8s" output -raw eks_cluster_name)" >/dev/null
 sh "$RAIZ/fiap-15soat-oficina-infra-db/scripts/criar-databases.sh"
 
-if [ -n "${NEW_RELIC_LICENSE_KEY:-}" ]; then
+if [ -n "${NEW_RELIC_LICENSE_KEY:-}" ] && [ -z "${SEM_NRI_BUNDLE:-}" ]; then
   echo "=== New Relic (nri-bundle)"
   helm repo add newrelic https://helm-charts.newrelic.com >/dev/null 2>&1 || true
   helm repo update newrelic >/dev/null

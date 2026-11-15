@@ -32,6 +32,11 @@ for par in sessao servico aprovacao; do
   [ -f "$CHAVES/$par.public.key" ] || falha "chaves ausentes em $CHAVES: rode sh scripts/gerar-chaves-locais.sh"
 done
 if [ -f "$OS_DIR/.env" ]; then set -a; . "$OS_DIR/.env"; set +a; fi
+# Os servicos compilam com --release 21; o mvn usa o JDK do JAVA_HOME, que pode ser outro.
+if [ -z "${SEM_TESTES:-}" ] && [ -x /usr/libexec/java_home ]; then
+  JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null) || falha "JDK 21 nao encontrado (mvn verify precisa dele)"
+  export JAVA_HOME
+fi
 
 tf_saida() { repo=$1; shift; terraform -chdir="$RAIZ/fiap-15soat-oficina-$repo" output "$@"; }
 
