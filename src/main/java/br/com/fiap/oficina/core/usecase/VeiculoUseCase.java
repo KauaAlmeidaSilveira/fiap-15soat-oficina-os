@@ -63,8 +63,9 @@ public class VeiculoUseCase {
 
     public void vincularCliente(Long veiculoId, Long clienteId) {
         buscarPorId(veiculoId);
-        clienteGateway.buscarPorId(clienteId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente", clienteId));
+        if (clienteGateway.buscarPorId(clienteId).isEmpty()) {
+            throw new RecursoNaoEncontradoException("Cliente", clienteId);
+        }
         if (veiculoGateway.existeVinculo(clienteId, veiculoId)) {
             throw new RegraDeNegocioException("Cliente já vinculado a este veículo.");
         }

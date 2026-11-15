@@ -43,7 +43,17 @@
                 }
               }
             },
-            "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+            "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_operador}}",
+                  "type": "string"
+                }
+              ]
+            }
           },
           "event": [
             {
@@ -784,7 +794,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -1219,7 +1239,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -1564,7 +1594,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -1999,7 +2039,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -2428,7 +2478,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -2996,7 +3056,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -3558,7 +3628,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -4330,7 +4410,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -5005,7 +5095,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -5633,7 +5733,17 @@
                     }
                   }
                 },
-                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores."
+                "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "event": [
                 {
@@ -6976,6 +7086,16 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "event": [
@@ -7014,6 +7134,16 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "event": [
@@ -7052,6 +7182,16 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "event": [
@@ -7219,6 +7359,16 @@
                     "api",
                     "produtos",
                     "{{novo_produto_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_operador}}",
+                      "type": "string"
+                    }
                   ]
                 }
               },
@@ -7481,6 +7631,47 @@
           ]
         },
         {
+          "name": "Login do operador",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_auth}}/auth/funcionario",
+              "host": [
+                "{{url_auth}}"
+              ],
+              "path": [
+                "auth",
+                "funcionario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operador@oficina.com\",\n  \"senha\": \"Operador@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.environment.set('token_operador', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Primeiro acesso do cliente",
           "request": {
             "method": "POST",
@@ -7564,7 +7755,7 @@
           ]
         }
       ],
-      "description": "Não funcionam localmente: o login é a Lambda, que o Docker Compose não sobe. Exigem url_auth preenchida e ainda não foram testadas na AWS."
+      "description": "Não funcionam localmente: o login é a Lambda, que o Docker Compose não sobe. Exigem url_auth preenchida e ainda não foram testadas na AWS.\n\nNa AWS cada usuário tem uma role só: `token` é o do ADMIN (`kaua@gmail.com`) e `token_operador` o do OPERADOR, exigido para criar, alterar e inativar produto. Rode esta pasta antes das outras e exporte o environment (`--export-environment`)."
     }
   ]
 }

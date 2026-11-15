@@ -80,4 +80,12 @@ class ProdutoRestGatewayUnitTest {
         assertThat(gateway.buscarPorId(2L)).isEmpty();
         assertThatThrownBy(() -> gateway.buscarPorId(3L)).isInstanceOf(ServicoIndisponivelException.class);
     }
+
+    @Test
+    @DisplayName("200 sem corpo também vira vazio, em vez de NullPointerException")
+    void respostaSemCorpo() {
+        execucao.stubFor(get("/internal/produtos/4").willReturn(aResponse().withStatus(200)));
+
+        assertThat(gateway.buscarPorId(4L)).isEmpty();
+    }
 }

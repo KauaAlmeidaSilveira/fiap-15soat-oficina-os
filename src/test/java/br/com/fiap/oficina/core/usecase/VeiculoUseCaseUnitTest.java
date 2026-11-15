@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -133,6 +135,17 @@ class VeiculoUseCaseUnitTest {
         assertThatThrownBy(() -> veiculoUseCase.vincularCliente(1L, 1L))
                 .isInstanceOf(RegraDeNegocioException.class)
                 .hasMessageContaining("já vinculado");
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao vincular cliente inexistente, sem criar vínculo")
+    void deveLancarExcecaoClienteInexistente() {
+        when(veiculoGateway.buscarPorId(1L)).thenReturn(Optional.of(veiculoExistente));
+        when(clienteGateway.buscarPorId(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> veiculoUseCase.vincularCliente(1L, 99L))
+                .isInstanceOf(RecursoNaoEncontradoException.class);
+        verify(veiculoGateway, never()).vincularCliente(anyLong(), anyLong());
     }
 
     @Test

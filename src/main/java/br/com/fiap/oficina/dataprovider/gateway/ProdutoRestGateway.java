@@ -56,6 +56,9 @@ public class ProdutoRestGateway implements ProdutoGateway {
                     })
                     .retrieve()
                     .body(ProdutoInterno.class);
+            if (p == null) {
+                return Optional.empty();
+            }
             return Optional.of(new Produto(p.id(), p.nome(), p.tipo(), p.precoUnitario()));
         } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();

@@ -44,6 +44,9 @@ tokens = {
     "token_servico": assinar("servico", {"iss": "oficina-os", "aud": "oficina-execucao", "sub": "oficina-os"}),
 }
 
+# Na AWS o OPERADOR tem login próprio; aqui o token com as 3 roles serve aos dois.
+tokens["token_operador"] = tokens["token"]
+
 environment = json.loads(MODELO.read_text(encoding="utf-8"))
 for variavel in environment["values"]:
     if variavel["key"] in tokens:

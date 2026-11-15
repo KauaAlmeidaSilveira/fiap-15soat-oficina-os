@@ -43,7 +43,7 @@ Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhec
 - **Provado localmente:** fluxo completo da OS até a entrega, compensações F1 a F10 e reinício do orquestrador, com os 3 serviços em Docker. A collection repete o fluxo e as falhas, menos F3 e o reinício.
 - **Simulado:** SQS e DynamoDB no LocalStack, Mercado Pago no WireMock e e-mail no Mailpit.
 - **Testado na AWS em 15/11/2026:** fluxo feliz completo, com Lambda, Gateway, RDS, SQS, DynamoDB, Pod Identity, HPA, Gmail e a API real do Mercado Pago (QR, pagamento aprovado e webhook).
-- **Nunca testado em ambiente real:** compensações na AWS, pagamento recusado, QR expirado e cancelamento da cobrança no Mercado Pago, CI e SonarCloud.
+- **Nunca testado em ambiente real:** compensações na AWS e CI. Qualidade validada com SonarQube local em 15/11/2026.
 - **Suposições do Mercado Pago:** `qr_data` e assinatura conferidos em 15/11/2026 (a assinatura usa o id da order na grafia original; corrigido). Método de cancelamento e status de pagamento recusado ficam opcionais (não exigidos; cobertos contra o WireMock).
 
 ### Ações na nuvem já feitas
@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **90 pendentes, 241 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **85 pendentes, 246 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -137,7 +137,7 @@ Contagem de 15/11/2026: **90 pendentes, 241 concluídos, 0 não verificáveis**.
 | 1. Separação em Microsserviços | 0 | **Muito grande** |
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
-| 4. Testes e Qualidade | 5 | Grande |
+| 4. Testes e Qualidade | 0 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
 | 6. Infraestrutura | 5 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
@@ -328,13 +328,13 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Testes unitários | [x] | [x] | [x] |
 | Testes de integração com o broker e o banco | [x] | [x] | [x] |
 | Gate de 80% sobre o serviço inteiro, não só 3 pacotes | [x] | [x] | [x] |
-| Sonar sem falha no quality gate | [ ] | [ ] | [ ] |
+| Sonar sem falha no quality gate | [x] | [x] | [x] |
 
 - [x] Escolher a ferramenta de BDD — Cucumber
 - [x] Escolher a ferramenta de qualidade — SonarCloud
 - [x] Configurar o Sonar no `pom.xml` dos 3 serviços
-- [ ] Criar os projetos no SonarCloud
-- [ ] Collection do Postman com um token por role na AWS: lá cada usuário tem uma role só (`kaua@gmail.com` ADMIN, `recepcao@oficina.com` RECEPCAO, `operador@oficina.com` OPERADOR), e o token único com as 3 roles só existe no local; no Catálogo, 23 de 49 asserções falharam em cascata a partir do 403 em `POST /api/produtos` — achado em 15/11/2026
+- [x] Criar os projetos no SonarCloud — trocado por SonarQube local em 15/11/2026 (`scripts/sonar-local.sh`): sem Actions, o SonarCloud não teria quem rodasse a análise. Os 3 passam no gate "Sonar way", com nota A em confiabilidade, segurança, revisão de segurança e manutenibilidade e cobertura de 95,4% (OS), 94,4% (Execução) e 92,5% (Billing); resultado e revisões no README do OS. O `ci.yml` continua com o passo do SonarCloud, que exige criar a organização se o Actions voltar
+- [x] Collection do Postman com um token por role na AWS: lá cada usuário tem uma role só (`kaua@gmail.com` ADMIN, `recepcao@oficina.com` RECEPCAO, `operador@oficina.com` OPERADOR), e o token único com as 3 roles só existe no local; no Catálogo, 23 de 49 asserções falharam em cascata a partir do 403 em `POST /api/produtos` — achado em 15/11/2026 Corrigido em 15/11/2026: a pasta de Login grava também `token_operador`, usado para criar, alterar e inativar produto (única regra só de OPERADOR); o resto usa o ADMIN. Newman local 233/233 fora da pasta de Login; na AWS, conferir na próxima subida
 - [x] Pelo menos um fluxo completo em BDD (abrir OS até a finalização)
 - [x] Definir onde o BDD do fluxo completo roda — no repositório do OS Service, subindo os outros serviços e a fila por Docker
 - [x] Cenário BDD de falha com compensação (não exigido, mas reforça a demonstração da Saga)
