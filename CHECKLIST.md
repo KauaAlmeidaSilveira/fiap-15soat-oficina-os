@@ -10,9 +10,9 @@
 
 ## Retomada: onde paramos
 
-**Regra vigente:** avanço sozinho só no desenvolvimento local. Nada de testar em cloud, e push, PR ou merge só com pedido do Kauã.
+**Regra vigente:** avanço sozinho só no desenvolvimento local. Subir ou destruir na AWS, criar recurso no Mercado Pago, push, PR e merge só com pedido explícito de quem opera (Júlio ou Kauã).
 
-**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Em 15/11/2026 ficaram escritos, em branches locais, os manifestos, a infraestrutura da conta pessoal e os scripts de subir, publicar e destruir (ver "Antes de testar na AWS"). Na primeira subida, em 15/11/2026, o node group do EKS não subiu: a conta nova tem cota de 1 vCPU on-demand e a AWS negou o aumento para 8 (caso 179476836800116).
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026. A AWS é a conta pessoal do Júlio e o GitHub Actions está fora: tudo roda manualmente, pelos scripts do OS. **Em 15/11/2026 o sistema subiu inteiro na AWS e uma OS foi do início à entrega pelo API Gateway, com Mercado Pago real (credenciais de teste), webhook assinado e e-mails pelo Gmail; o ambiente foi destruído em seguida.** O código dessa subida foi mergeado em 15/11/2026 na branch principal dos 6 repositórios (ver "Ações na nuvem já feitas"); o roteiro para subir de novo está em `SUBIR-AMBIENTE.md`, na pasta de trabalho.
 
 ### O que existe hoje
 
@@ -42,8 +42,9 @@ Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhec
 
 - **Provado localmente:** fluxo completo da OS até a entrega, compensações F1 a F10 e reinício do orquestrador, com os 3 serviços em Docker. A collection repete o fluxo e as falhas, menos F3 e o reinício.
 - **Simulado:** SQS e DynamoDB no LocalStack, Mercado Pago no WireMock e e-mail no Mailpit.
-- **Nunca testado em ambiente real:** AWS, API real do Mercado Pago, CI e SonarCloud.
-- **Suposições do Mercado Pago a conferir na primeira compra de teste:** caminho do `qr_data`, método de cancelamento, formato da assinatura do webhook e status de pagamento recusado. Seguem a documentação.
+- **Testado na AWS em 15/11/2026:** fluxo feliz completo, com Lambda, Gateway, RDS, SQS, DynamoDB, Pod Identity, HPA, Gmail e a API real do Mercado Pago (QR, pagamento aprovado e webhook).
+- **Nunca testado em ambiente real:** compensações na AWS, pagamento recusado, QR expirado e cancelamento da cobrança no Mercado Pago, CI e SonarCloud.
+- **Suposições do Mercado Pago:** `qr_data` e assinatura conferidos em 15/11/2026 (a assinatura usa o id da order na grafia original; corrigido). Faltam o método de cancelamento e o status de pagamento recusado.
 
 ### Ações na nuvem já feitas
 
@@ -53,18 +54,28 @@ Em 14/11/2026, o Júlio mergeou os PRs #1 de `infra-k8s` e `infra-db` (merge com
 
 No mesmo dia, o Júlio recebeu `write` nos 4 repositórios do Kauã e mergeou o PR #1 de `lambda-auth` em `master` (`6bd76db`). O workflow de deploy não começou, pelo mesmo bloqueio, e nada foi criado.
 
+Em 15/11/2026, na conta `390403887596` do Júlio:
+
+- `aws-bootstrap.sh` criou o bucket `fiap-15soat-oficina-fase4-tfstate`, a tabela de lock e o Budget `oficina-fase4` (US$ 20/mês). Ficam ligados entre as subidas.
+- Primeira subida: o node group falhou com `AsgInstanceLaunchFailures` (*MaxFleetCountExceeded*). A conta nova tem cota de 1 vCPU on-demand; o pedido de 8 vCPU virou o caso 179476836800116 e foi negado.
+- Segunda subida com 1 node `r6g.medium` (1 vCPU): tudo no ar depois de três ajustes (SMTP fora do health check do Billing, requests de CPU de 50m, JDK 21 no `mvn`). Newman: Login 3/3; Catálogo 26/49, com as falhas em cascata do token único (Seção 4). Fluxo completo feito à mão pelo Gateway até `ENTREGUE`.
+- Mercado Pago: webhook cadastrado no Modo de teste do painel; a primeira notificação assinada deu 401 e levou à correção da assinatura.
+- Ambiente destruído no fim do dia por `destruir-aws.sh` (109 recursos; conferido que não sobrou VPC, instância, NLB, NAT, EKS, RDS, ECR, fila, Lambda nem Gateway).
+- PRs mergeados pelo Júlio no mesmo dia, sem CI (Actions bloqueado): `infra-k8s` #2, `infra-db` #2, `lambda-auth` #2 e #3, Execução #3 e #4, Billing #3 e #4 e OS (`feat/deploy-aws`).
+
 ### Por onde retomar
 
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra:** `infra-k8s`, `infra-db` e `lambda-auth` mergeados em 14/11/2026, sem `apply` (ver "Ações na nuvem já feitas"). Antes do primeiro `apply`, adaptar à conta pessoal (ver "Antes de testar na AWS"). A ordem de `apply` continua valendo, com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
-5. **Criar os acessos externos:** SonarCloud e acesso à conta AWS do Júlio (ver "Antes de testar na AWS"). Mercado Pago: credenciais de teste, loja e caixa prontos em 15/11/2026; faltam a conta compradora de teste e a URL pública do webhook (túnel no local).
-6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
+5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. Falta o SonarCloud.
+6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Faltam, na próxima subida, as compensações pela AWS, pagamento recusado, QR expirado e cancelamento da cobrança.
+7. **Próximos passos:** documentação (Seção 8), SonarCloud e a gravação do vídeo numa nova subida.
 
-### Antes de testar na AWS
+### Ambiente na AWS
 
-Escrito em 15/11/2026, ainda nunca aplicado (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`; no OS, `feat/deploy-aws`):
+Escrito e aplicado em 15/11/2026, e mergeado no mesmo dia na branch principal dos 6 repositórios. Roteiro completo, com os problemas já vistos, em `SUBIR-AMBIENTE.md` na pasta de trabalho:
 
 - `k8s/` nos 3 serviços: `Namespace`, `ServiceAccount`, `ConfigMap`, `Deployment` (probes, requests e limits), `Service` LoadBalancer com NLB interno e `HPA`; `.dockerignore` para chaves e `.env` não entrarem na imagem;
 - `infra-k8s`: roles do cluster e dos nodes, uma role por serviço pelo EKS Pod Identity (cada uma só com as próprias filas e, no Billing, a tabela), ECR por serviço com `force_delete`, nodes ARM `t4g.medium` (imagem construída sem emulação nos Macs);
@@ -72,13 +83,14 @@ Escrito em 15/11/2026, ainda nunca aplicado (branches locais `feat/conta-aws-pes
 - `lambda-auth`: role própria da Lambda, um NLB e uma integração por serviço, rotas por prefixo, `/aprovacao-os` e `/webhooks/mercado-pago` públicas no Billing;
 - OS: `scripts/aws-bootstrap.sh` (bucket do state, lock e Budget, uma vez), `scripts/subir-aws.sh` (tudo, na ordem), `scripts/deploy-aws.sh` (testes, imagem, ECR, Secrets e manifestos) e `scripts/destruir-aws.sh` (ordem inversa, NLBs antes).
 
-**Conta AWS pessoal (decidido em 14/11/2026):** os testes e o vídeo usam a conta pessoal do Júlio, não o Academy. O ambiente sobe para testar e é destruído logo depois; sobe de novo para gravar o vídeo e é destruído de novo. Antes do primeiro `apply`, falta:
+**Conta AWS pessoal (decidido em 14/11/2026):** os testes e o vídeo usam a conta pessoal do Júlio, não o Academy. O ambiente sobe para testar e é destruído logo depois; sobe de novo para gravar o vídeo e é destruído de novo. Preparação feita em 15/11/2026:
 
 - configurar o profile `personal` do AWS CLI na máquina do Júlio e rodar tudo com `AWS_PROFILE=personal-tf` (profile com `credential_process` em cima da sessão do `aws login --profile personal`, que o Terraform não lê), conferindo `aws sts get-caller-identity` antes de cada `apply` (há profiles de trabalho na mesma máquina);
 - usar Terraform 1.9.8, a versão dos workflows, e Node 22 (`.nvmrc` do `lambda-auth`);
 - rodar `scripts/aws-bootstrap.sh` uma vez (bucket de state, tabela de lock e AWS Budget com alerta);
 - preencher no `.env` do OS o `NEW_RELIC_LICENSE_KEY` e o Gmail do envio de e-mail (`GMAIL_SMTP_USERNAME` e `GMAIL_SMTP_PASSWORD`, uma senha de app); sem o Gmail, orçamento e QR não chegam ao cliente;
-- a sessão do profile `personal` é do usuário root da conta: preferir um usuário ou role IAM com permissão de administrador;
+- a sessão do profile `personal` é do usuário root da conta: preferir um usuário ou role IAM com permissão de administrador (ainda root);
+- por causa da cota de 1 vCPU, `infra-k8s/terraform.tfvars` (gitignorado) fixa 1 node `r6g.medium`, e a subida roda com `SEM_NRI_BUNDLE=1`.
 
 **Secrets do GitHub:** os atuais são do Academy e estão expirados. Com o Actions fora, não são usados; ficam registrados para o caso de ele voltar:
 
@@ -99,7 +111,7 @@ Escrito em 15/11/2026, ainda nunca aplicado (branches locais `feat/conta-aws-pes
 6. Se algum recurso falhar, registrar o erro exato neste checklist, em "Pontos de atenção".
 7. Destruir tudo ao terminar, na ordem inversa, e conferir no console que não sobrou NLB, NAT Gateway nem EKS.
 
-Com as branches acima, `AWS_PROFILE=personal-tf sh scripts/subir-aws.sh` faz os passos 3 e 4, cria os databases, instala o New Relic, faz o deploy, aplica o `lambda-auth` e faz o segundo deploy; `scripts/destruir-aws.sh` faz o passo 7. O build da imagem em ARM ainda não foi conferido (o Docker estava desligado).
+Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subir-aws.sh` faz os passos 3 e 4, cria os databases, faz o deploy, aplica o `lambda-auth` e faz o segundo deploy; `scripts/destruir-aws.sh` faz o passo 7. As imagens ARM foram conferidas (sem chaves nem `.env` dentro).
 
 **Ordem de `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
 
@@ -117,18 +129,18 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **113 pendentes, 217 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **101 pendentes, 233 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
-| 0. Decisões em aberto | 3 | Pequeno, mas trava o resto |
-| 1. Separação em Microsserviços | 8 | **Muito grande** |
-| 2. Comunicação entre Microsserviços | 3 | Grande |
+| 0. Decisões em aberto | 1 | Pequeno, mas trava o resto |
+| 1. Separação em Microsserviços | 4 | **Muito grande** |
+| 2. Comunicação entre Microsserviços | 1 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
-| 4. Testes e Qualidade | 4 | Grande |
+| 4. Testes e Qualidade | 5 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
-| 6. Infraestrutura | 9 | Grande |
-| 7. Monitoramento e Observabilidade | 11 | Médio |
+| 6. Infraestrutura | 5 | Grande |
+| 7. Monitoramento e Observabilidade | 10 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
 | 9. Entregáveis | 29 | Médio |
 | Higiene do repositório | 0 | Pequeno |
@@ -168,8 +180,8 @@ Decisões tomadas pelo Kauã em 02/11/2026. Só a D7 segue em aberto.
 Levantamentos que destravam as decisões:
 
 - [x] Ler o enunciado e comparar com a Fase 3
-- [ ] Validar SQS na conta AWS que for usada (D5) — conta do Júlio
-- [ ] Validar DynamoDB na conta AWS que for usada (D6) — conta do Júlio
+- [x] Validar SQS na conta AWS que for usada (D5) — conta do Júlio — validado na AWS em 15/11/2026: 3 filas e 3 DLQs criadas pelo `infra-k8s`, comandos e eventos da Saga trafegando nos dois sentidos
+- [x] Validar DynamoDB na conta AWS que for usada (D6) — conta do Júlio — validado na AWS em 15/11/2026: tabela `oficina-billing` com orçamento, cobrança e outbox, acesso pela role do Pod Identity
 - [x] Ler a [documentação do Mercado Pago (QR dinâmico)](https://www.mercadopago.com.br/developers/pt/docs/qr-code/payment-processing)
 - [x] Criar `docs/requisitos-fase4.md`, espelho em texto do PDF, como a Fase 3 fez
 
@@ -227,21 +239,22 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 - [x] Criar conta e credenciais de teste — em 15/11/2026: usuário vendedor de teste `3846952336`, loja `OFICINAMATRIZ` (`90050202`) e caixa `OFICINACAIXA1` (`140857597`), criados pela API; token no `.env` do OS, fora do git. Falta a conta compradora de teste
 - [x] Ler o token de variável de ambiente (`MERCADOPAGO_ACCESS_TOKEN`), nunca do repositório
-- [ ] Guardar o token como secret no ambiente real
+- [x] Guardar o token como secret no ambiente real — validado na AWS em 15/11/2026: `Secret` `oficina-billing-secrets`, criado pelo `deploy-aws.sh` a partir do `.env`
 - [x] Gerar QR dinâmico para o valor do orçamento, testado contra o simulador
-- [ ] Conferir o QR gerado com conta real, incluindo o caminho do `qr_data`
+- [x] Conferir o QR gerado com conta real, incluindo o caminho do `qr_data` — validado na AWS em 15/11/2026: order `type: qr`, modo `dynamic`, `qr_data` em `type_response`, enviado por e-mail
 - [x] Receber o webhook no Billing, testado contra o simulador
-- [ ] Receber webhook em rota pública do API Gateway
+- [x] Receber webhook em rota pública do API Gateway — validado na AWS em 15/11/2026: notificação do painel (Modo de teste) chegou ao Billing pelo Gateway
 - [x] Validar a autenticidade do webhook conforme a documentação (`AssinaturaWebhook`)
-- [ ] Conferir o formato da assinatura com um webhook real
+- [x] Conferir o formato da assinatura com um webhook real — validado na AWS em 15/11/2026: o Mercado Pago assina o `data.id` da order na grafia original, não em minúsculas; corrigido no Billing (aceita as duas) e sem `request-id` o manifesto omite a parte
 - [ ] Conferir o cancelamento da cobrança com conta real
 - [x] Tratar webhook repetido sem duplicar pagamento
 - [x] Consultar o status na API do Mercado Pago, sem confiar só no corpo do webhook
 - [x] Testar pagamento aprovado e QR expirado no BDD, contra o simulador (D2)
 - [x] Testar pagamento recusado em teste de unidade do Billing, sem cenário BDD próprio
-- [ ] Testar pagamento aprovado com conta real de teste
+- [x] Testar pagamento aprovado com conta real de teste — validado na AWS em 15/11/2026: conta compradora de teste pagou pelo app, order `processed/accredited`, cobrança `PAGA`, Saga até `CONCLUIDA` e OS `ENTREGUE`
 - [ ] Testar pagamento recusado com conta real de teste
 - [ ] Testar QR expirado com conta real de teste (D2)
+- [ ] Webhook de order inexistente responde 500 (o Billing propaga o 404 do Mercado Pago), e o Mercado Pago reenvia; responder 200 com aviso no log — achado em 15/11/2026
 
 ### Execução e Produção
 
@@ -272,13 +285,14 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 - [x] Definir o que é REST síncrono e o que é evento
 - [x] Documentar o catálogo de eventos (nome, produtor, consumidor, payload)
 - [x] Escrever o broker em Terraform (D5) — `sqs.tf`, em `main` de `infra-k8s` desde 14/11/2026 (PR #1), com `terraform validate` ok
-- [ ] Provisionar o broker na conta AWS (D5)
+- [x] Provisionar o broker na conta AWS (D5) — validado na AWS em 15/11/2026
 - [x] Criar as filas de cada fluxo no LocalStack (D5)
-- [ ] Criar as filas de cada fluxo na conta AWS (D5)
+- [x] Criar as filas de cada fluxo na conta AWS (D5) — validado na AWS em 15/11/2026
 - [x] Configurar dead-letter queue e política de retry no Terraform e no LocalStack
-- [ ] Criar dead-letter queue e política de retry na conta AWS
+- [x] Criar dead-letter queue e política de retry na conta AWS — validado na AWS em 15/11/2026
 - [x] Consumidores idempotentes em cada serviço
 - [x] Publicação confiável de evento junto com a gravação no banco (outbox ou equivalente), no OS, no Billing e no caminho por fila da Execução
+- [ ] Investigar mensagem do outbox do Billing publicada duas vezes com 2 réplicas (mesmo `OUTBOX#id` nos logs dos dois pods); o OS descarta pela inbox, mas a publicação deveria ser única — achado em 15/11/2026
 - [x] Rotas de operador da Execução (`/diagnostico` e `/reparo`) gravando item e `outbox` na mesma transação — `@Transactional` nas 4 rotas de `ExecucaoController`; `ExecucaoControllerTransacaoIT` força falha na outbox e confirma que o item não muda
 - [x] Clientes REST com timeout e tratamento de falha
 - [x] Autenticar chamadas entre serviços com JWT de serviço de curta duração, definindo quem pode assiná-lo
@@ -321,6 +335,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 - [x] Escolher a ferramenta de qualidade — SonarCloud
 - [x] Configurar o Sonar no `pom.xml` dos 3 serviços
 - [ ] Criar os projetos no SonarCloud
+- [ ] Collection do Postman com um token por role na AWS: lá cada usuário tem uma role só (`kaua@gmail.com` ADMIN, `recepcao@oficina.com` RECEPCAO, `operador@oficina.com` OPERADOR), e o token único com as 3 roles só existe no local; no Catálogo, 23 de 49 asserções falharam em cascata a partir do 403 em `POST /api/produtos` — achado em 15/11/2026
 - [x] Pelo menos um fluxo completo em BDD (abrir OS até a finalização)
 - [x] Definir onde o BDD do fluxo completo roda — no repositório do OS Service, subindo os outros serviços e a fila por Docker
 - [x] Cenário BDD de falha com compensação (não exigido, mas reforça a demonstração da Saga)
@@ -360,23 +375,23 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 
 ### `infra-k8s`
 
-- [x] ECR por serviço — `ecr.tf`, com `force_delete` (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
-- [ ] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (2 nós `t4g.medium`, máximo 3; requests de 250m e 384Mi por serviço)
+- [x] ECR por serviço — `ecr.tf`, com `force_delete` (mergeado e aplicado na AWS em 15/11/2026)
+- [x] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (2 nós `t4g.medium`, máximo 3; requests de 250m e 384Mi por serviço) — validado na AWS em 15/11/2026: a conta tem cota de 1 vCPU (aumento negado), então roda com 1 node `r6g.medium` (1 vCPU, 8 GB), prefix delegation e requests de 50m; sem `nri-bundle`, que não cabe. Uso real em repouso ~6% de CPU e ~28% de memória; o HPA escalou Billing e Execução para 2 réplicas na subida
 - [x] Escrever broker e demais recursos no repositório escolhido (D5) — `sqs.tf`, em `main` desde 14/11/2026
-- [ ] Aplicar broker e demais recursos na conta AWS (D5)
+- [x] Aplicar broker e demais recursos na conta AWS (D5) — validado na AWS em 15/11/2026
 - [ ] Confirmar o modelo de cluster com o professor (D7)
 
 ### `infra-db`
 
-- [x] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço, criados por `scripts/criar-databases.sh` (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
-- [ ] Provisionar os bancos SQL na conta AWS (D6)
+- [x] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço, criados por `scripts/criar-databases.sh` (mergeado e aplicado na AWS em 15/11/2026)
+- [x] Provisionar os bancos SQL na conta AWS (D6) — validado na AWS em 15/11/2026: databases `oficina_os` e `oficina_execucao` criados por `criar-databases.sh`
 - [x] Escrever o banco NoSQL (D6) — `dynamodb.tf`, em `main` desde 14/11/2026
-- [ ] Provisionar o banco NoSQL na conta AWS (D6)
-- [x] Restringir as credenciais: cada serviço só alcança o próprio banco — usuário dono só do próprio database e, no Billing, role do Pod Identity só com a tabela (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
+- [x] Provisionar o banco NoSQL na conta AWS (D6) — validado na AWS em 15/11/2026
+- [x] Restringir as credenciais: cada serviço só alcança o próprio banco — usuário dono só do próprio database e, no Billing, role do Pod Identity só com a tabela (mergeado e aplicado na AWS em 15/11/2026)
 
 ### `lambda-auth` (API Gateway)
 
-- [x] Trocar a rota única `ANY /api/{proxy+}` por rotas para cada serviço (branches locais `feat/conta-aws-pessoal` e `feat/manifestos-k8s`, 15/11/2026, sem push nem `apply`)
+- [x] Trocar a rota única `ANY /api/{proxy+}` por rotas para cada serviço (mergeado e aplicado na AWS em 15/11/2026)
 - [x] Criar um NLB interno e integração por serviço — o NLB vem do `Service` de cada `k8s/`
 - [x] Mover a rota pública `/aprovacao-os` para o Billing
 - [x] Criar a rota pública do webhook do Mercado Pago — `POST /webhooks/mercado-pago`
@@ -397,8 +412,9 @@ Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para 
 Billing e Execução não têm `docker-compose` próprio: sobem pelo do OS, e seus testes usam Testcontainers. Se isso bastar, as duas linhas podem sair.
 
 - [x] `docker-compose` que suba o sistema inteiro localmente — em `fiap-15soat-oficina-os`
+- [ ] Probes em `/actuator/health/liveness` e `/readiness` (hoje usam o health completo, que inclui dependências externas; o SMTP já foi tirado no ConfigMap do Billing), liberando as rotas no `SecurityConfig` — achado em 15/11/2026
 - [ ] Ajustar o CI que tem `oficina-db` fixo no `aws rds wait` — está na pipeline do monólito; vale para o deploy dos serviços novos
-- [ ] Atualizar o bucket de state e as chaves do Terraform para os recursos novos
+- [x] Atualizar o bucket de state e as chaves do Terraform para os recursos novos — validado na AWS em 15/11/2026: bucket `fiap-15soat-oficina-fase4-tfstate` (o nome antigo é de outra conta), criado por `aws-bootstrap.sh`
 
 ## 7. Monitoramento e Observabilidade
 
@@ -407,7 +423,7 @@ O enunciado pede o uso das ferramentas já implementadas na Fase 3: **New Relic*
 | Item | OS | Billing | Execução |
 |---|---|---|---|
 | Agente New Relic na imagem, com `appName` próprio no `docker-compose` | [x] | [x] | [x] |
-| Agente reportando no New Relic, com `appName` nos manifestos | [ ] | [ ] | [ ] |
+| Agente reportando no New Relic, com `appName` nos manifestos | [ ] | [x] | [ ] |
 | Logs JSON com correlação | [x] | [x] | [x] |
 | Métricas de negócio migradas | [x] | [x] | [ ] |
 
@@ -491,7 +507,7 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 1. **Custo da conta AWS pessoal.** Desde 14/11/2026 a AWS é a conta pessoal do Júlio, e cada hora ligada custa (EKS, NAT Gateway, nós, RDS, NLBs). Destruir tudo ao fim de cada uso, conferir no console que não sobrou nada e manter um AWS Budget com alerta. Os secrets do Academy, expirados, deixaram de valer: os `terraform plan` dos PRs falharam por token expirado.
 2. **Código feito para o Academy.** Na Fase 3, o módulo `terraform-aws-modules/eks` falhou por `iam:GetRole` e foi substituído por recursos nativos, e o EKS e a Lambda reutilizam a `LabRole`. Na conta pessoal a `LabRole` não existe: as roles precisam ser criadas no Terraform antes do primeiro `apply`.
 3. **Infraestrutura precisa estar no ar para gravar o vídeo.** Reservar tempo para subir tudo de novo, incluindo o ambiente com credenciais renovadas.
-4. **Webhook do Mercado Pago depende de URL pública estável.** Em desenvolvimento local é preciso um túnel ou simular a chamada.
+4. **Webhook do Mercado Pago depende de URL pública estável.** A URL do Gateway muda a cada subida: recadastrar no painel (aba Modo de teste) depois de subir. Em desenvolvimento local é preciso um túnel ou simular a chamada.
 5. **Paridade funcional.** A divisão não pode perder comportamento da Fase 3: as regras de `OrdemServicoUseCase`, de `Cliente` e de estoque precisam ser conferidas contra a tabela de endpoints da Seção 1.
 6. **Falha de notificação.** Resolvido pela D20: orçamento *best-effort*, QR com 3 tentativas e depois falha de cobrança.
 7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. Sem o Actions, a evidência no README passa a ser o relatório do JaCoCo gerado localmente (print ou arquivo).

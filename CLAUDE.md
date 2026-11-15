@@ -22,7 +22,8 @@ ficam no `.env` deste repositório (gitignorado; modelo em `.env.example`).
 
 ## Fonte de verdade: `CHECKLIST.md`
 
-- Ao começar, ler a seção **Retomada** e, para AWS, **Antes de testar na AWS** (tem o roteiro do Júlio).
+- Ao começar, ler a seção **Retomada** e, para AWS, **Ambiente na AWS**. O passo a passo para subir, testar e
+  destruir está em `SUBIR-AMBIENTE.md`, na pasta de trabalho (fora do git).
 - Plano aprovado e diferenças: `docs/plano-secoes-0-4.md`. Requisitos do enunciado: `docs/requisitos-fase4.md`.
 - **O checklist fica sempre atualizado.** Em todo fix, feat, push, PR, merge ou decisão, no mesmo passo:
   o item `[ ]`/`[x]`, a Retomada, a Dimensão (contagem total e por seção) e os parágrafos que ficaram velhos.
@@ -43,8 +44,9 @@ pedido explícito de quem está operando.
   O ambiente sobe para testar ou gravar e é destruído logo depois; nada fica ligado sem uso.
 - Ordem de `apply`: `infra-k8s` → `infra-db` → deploy dos serviços → `lambda-auth`. Destruir na ordem
   inversa, apagando antes os `Service`s LoadBalancer (os NLBs são do Kubernetes e travam a VPC).
-- O Terraform ainda reutiliza a `LabRole` do Academy (`infra-k8s/eks.tf`, `lambda-auth/terraform/lambda.tf`);
-  na conta pessoal ela não existe, e as roles precisam ser criadas antes do primeiro `apply`.
+- Desde 15/11/2026 as roles são criadas pelo Terraform (sem `LabRole`), e os serviços acessam SQS e DynamoDB
+  pelo EKS Pod Identity. A conta tem cota de 1 vCPU on-demand: 1 node `r6g.medium` via `terraform.tfvars` e
+  subida com `SEM_NRI_BUNDLE=1`.
 
 ## Regra de negócio
 
