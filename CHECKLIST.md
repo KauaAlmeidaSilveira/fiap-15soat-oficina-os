@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **96 pendentes, 238 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **94 pendentes, 240 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -140,7 +140,7 @@ Contagem de 15/11/2026: **96 pendentes, 238 concluídos, 0 não verificáveis**.
 | 4. Testes e Qualidade | 5 | Grande |
 | 5. CI/CD Automatizado | 36 | Médio |
 | 6. Infraestrutura | 5 | Grande |
-| 7. Monitoramento e Observabilidade | 6 | Médio |
+| 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
 | 9. Entregáveis | 29 | Médio |
 | Higiene do repositório | 0 | Pequeno |
@@ -423,20 +423,20 @@ O enunciado pede o uso das ferramentas já implementadas na Fase 3: **New Relic*
 | Item | OS | Billing | Execução |
 |---|---|---|---|
 | Agente New Relic na imagem, com `appName` próprio no `docker-compose` | [x] | [x] | [x] |
-| Agente reportando no New Relic, com `appName` nos manifestos | [ ] | [x] | [ ] |
+| Agente reportando no New Relic, com `appName` nos manifestos | [x] | [x] | [x] |
 | Logs JSON com correlação | [x] | [x] | [x] |
 | Métricas de negócio migradas | [x] | [x] | [ ] |
 
-Execução não tem métrica própria, e as métricas do monólito ficaram no OS e no Billing; ela aparece nos painéis pelas mensagens que publica e pelo APM. Como o `nri-bundle` (que lia o `/actuator/prometheus`) não cabe no node de 1 vCPU, os painéis usam eventos customizados do agente (`EventosNewRelic`) e os logs vão pelo próprio agente, com o MDC em `context.*` (ver `observability/README.md`).
+Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transações e spans dos três). Execução não tem métrica própria, e as métricas do monólito ficaram no OS e no Billing; ela aparece nos painéis pelas mensagens que publica e pelo APM. Como o `nri-bundle` (que lia o `/actuator/prometheus`) não cabe no node de 1 vCPU, os painéis usam eventos customizados do agente (`EventosNewRelic`) e os logs vão pelo próprio agente, com o MDC em `context.*` (ver `observability/README.md`).
 
 - [x] Propagar `X-Correlation-Id` na chamada REST OS → Execução
 - [x] Propagar `X-Correlation-Id` na chamada REST Lambda → OS — em 15/11/2026, por `AsyncLocalStorage` (`src/correlacao.js`); a Lambda gera o id quando não vem e o devolve na resposta (branch `fix/repassar-correlation-id`)
 - [x] Propagar correlação e ID da Saga nas mensagens — `Envelope` e `MDC` nos listeners
 - [ ] Trace distribuído visível de ponta a ponta, atravessando o broker — escrito em 15/11/2026 (`RastreioDistribuido`: cabeçalhos do trace no campo `rastreio` do envelope, aceitos no listener com `@Trace(dispatcher = true)`), falta ver no New Relic com o ambiente no ar
-- [x] Adaptar os dashboards de `observability/`, hoje amarrados ao `oficina-api` — `observability/` no OS, dashboard "Oficina Fase 4 - Microsserviços e Saga" (Serviços, Saga, Pagamentos, Rastreamento), escrito em 15/11/2026, sem `apply`
+- [x] Adaptar os dashboards de `observability/`, hoje amarrados ao `oficina-api` — `observability/` no OS, dashboard "Oficina Fase 4 - Microsserviços e Saga" (Serviços, Saga, Pagamentos, Rastreamento), aplicado em 15/11/2026 na conta 7428180 (`terraform apply` local; as 26 consultas NRQL conferidas pela API)
 - [x] Criar painel de Saga (em andamento, concluídas, compensadas) — eventos customizados `OficinaSagaTransicao` e `OficinaMensagemPublicada`, que não dependem do `nri-bundle`
 - [x] Criar painel de pagamentos — a partir dos eventos publicados pelo Billing (`OficinaMensagemPublicada`) e de `OficinaIntegracaoFalha`
-- [ ] Criar alerta para falha de Saga e fila parada ou com DLQ — Saga (`COMPENSACAO_FALHOU`), falha de cobrança ou estorno, integração, erro, latência e serviço sem dados escritos em `observability/alertas.tf`; a DLQ fica de fora (métrica do CloudWatch, exige integrar a conta AWS ao New Relic)
+- [ ] Criar alerta para falha de Saga e fila parada ou com DLQ — Saga (`COMPENSACAO_FALHOU`), falha de cobrança ou estorno, integração, erro, latência e serviço sem dados aplicados em 15/11/2026 (`observability/alertas.tf`, e-mail); a DLQ fica de fora (métrica do CloudWatch, exige integrar a conta AWS ao New Relic)
 - [x] Definir o novo repositório de `observability/`, que hoje mora na `api` — no OS, junto do compose e do Postman
 - [ ] Validar tudo com a infraestrutura no ar, como na Fase 3
 
