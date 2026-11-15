@@ -63,6 +63,13 @@ docker compose up -d --build --wait   # OS 8081, Execução 8082, Billing 8083, 
 sh scripts/rodar-bdd.sh               # sobe tudo, roda os cenários Cucumber e derruba
 ```
 
+Para usar a API real do Mercado Pago (credenciais de teste) no lugar do WireMock, preencha o `.env` a partir
+do `.env.example` e suba com o arquivo extra. O BDD continua no WireMock.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.mercadopago.yml up -d --build --wait
+```
+
 Para os testes unitários e de integração, com Docker ligado para o Testcontainers:
 
 ```bash

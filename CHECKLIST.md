@@ -12,7 +12,7 @@
 
 **Regra vigente:** avanço sozinho só no desenvolvimento local. Nada de testar em cloud, e push, PR ou merge só com pedido do Kauã.
 
-**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026; `lambda-auth` e infra estão aprovados e aguardam o `apply` na conta do Júlio. Nada rodou em ambiente real.
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026, sem `apply`. A AWS passa a ser a conta pessoal do Júlio, não o Academy, e o GitHub Actions está fora: tudo roda manualmente. Nada rodou em ambiente real.
 
 ### O que existe hoje
 
@@ -21,11 +21,11 @@
 | `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) mergeado em 08/11/2026, com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
 | `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) mergeado em 08/11/2026 | 82 testes, 95,4% de cobertura |
 | `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) mergeado em 08/11/2026, com os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
-| `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) aberto | 45 testes; `terraform validate` ok |
-| `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) aberto | `terraform validate` ok |
-| `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) aberto | `terraform validate` ok |
+| `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) mergeado em 14/11/2026, sem deploy | 45 testes; `terraform validate` ok |
+| `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) mergeado em 14/11/2026, sem `apply` | `terraform validate` ok |
+| `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) mergeado em 14/11/2026, sem `apply` | `terraform validate` ok |
 
-O workflow de CI está nos PRs #2 de cada serviço ([Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2), [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2), [OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2)), abertos em 08/11/2026. A primeira execução não começou: o GitHub Actions recusou com "The job was not started because your account is locked due to a billing issue". O PR [#3 do OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/3) leva este checklist atualizado para `main`. O código dos 3 serviços está em `main`; o de `lambda-auth`, `infra-k8s` e `infra-db` segue nas branches dos PRs aprovados.
+O workflow de CI (`ci.yml`) está em `main` nos 3 serviços desde 14/11/2026 ([OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2) mergeados pelo Kauã, [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2) pelo Júlio), sem nunca ter rodado: o GitHub Actions das duas contas está bloqueado por billing (ponto de atenção 8). **Decidido em 14/11/2026: o Actions não volta, e build, testes, `apply` e deploy passam a ser manuais, da máquina do Júlio.** O código dos 3 serviços, de `infra-k8s`, de `infra-db` e de `lambda-auth` está em `main`/`master`; não há PR aberto.
 
 Para ver o sistema funcionando, a partir de `fiap-15soat-oficina-os`, com o Docker ligado e os repositórios de Execução e Billing na pasta vizinha:
 
@@ -49,13 +49,17 @@ Para montar a pasta de trabalho (repositórios lado a lado e `legado/`) e conhec
 
 Antes da regra acima, abri os 6 PRs. Em `lambda-auth`, `infra-k8s` e `infra-db`, o PR disparou o `terraform plan`, que falhou com `The security token included in the request is expired`. O `apply` foi pulado e nenhum recurso foi criado. Os PRs dos repositórios do Júlio foram abertos sem eu saber que eram dele.
 
+Em 14/11/2026, o Júlio mergeou os PRs #1 de `infra-k8s` e `infra-db` (merge commits `798bb49` e `4a8e4af`). Os workflows de `main` não começaram: a conta `JulioNCavalcanti` também está com o GitHub Actions bloqueado por billing (ponto de atenção 8). Nenhum recurso foi criado. Mesmo com o Actions liberado, o `apply` desses dois repositórios espera aprovação: o environment `producao` exige revisor.
+
+No mesmo dia, o Júlio recebeu `write` nos 4 repositórios do Kauã e mergeou o PR #1 de `lambda-auth` em `master` (`6bd76db`). O workflow de deploy não começou, pelo mesmo bloqueio, e nada foi criado.
+
 ### Por onde retomar
 
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
-2. **PRs de infra (`infra-k8s`, `infra-db`, `lambda-auth`):** aprovados, mas o merge dispara `terraform apply`. O Júlio troca os secrets pelos da conta dele e mergeia na ordem de "Antes de testar na AWS", com `lambda-auth` por último.
+2. **PRs de infra:** `infra-k8s`, `infra-db` e `lambda-auth` mergeados em 14/11/2026, sem `apply` (ver "Ações na nuvem já feitas"). Antes do primeiro `apply`, adaptar à conta pessoal (ver "Antes de testar na AWS"). A ordem de `apply` continua valendo, com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
-4. **Liberar o CI:** desbloquear o GitHub Actions da conta `KauaAlmeidaSilveira` (ver ponto de atenção 8), rodar de novo o CI dos PRs #2, mergear quando ficar verde e proteger `main` nos 3 serviços.
-5. **Criar os acessos externos:** SonarCloud, secrets da conta AWS do Júlio (ver "Antes de testar na AWS") e conta do Mercado Pago.
+4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
+5. **Criar os acessos externos:** SonarCloud e acesso à conta AWS do Júlio (ver "Antes de testar na AWS"). Mercado Pago: credenciais de teste, loja e caixa prontos em 15/11/2026; faltam a conta compradora de teste e a URL pública do webhook (túnel no local).
 6. **Validar no ambiente real:** seguir os itens "na conta AWS" e "com conta real" das Seções 0 a 2.
 
 ### Antes de testar na AWS
@@ -68,36 +72,44 @@ O código dos serviços já está em `main`, mas isso não põe o sistema no ar.
 - rotas por serviço no API Gateway, com um NLB interno por serviço, em `lambda-auth`;
 - roteiro de deploy: secrets (chaves JWT, banco, SMTP, New Relic, Mercado Pago), build e push das imagens e `kubectl apply`.
 
-**Secrets do GitHub:** os atuais estão expirados. Os testes na AWS usam a conta do Júlio, e os secrets precisam ser trocados pelos dela antes de qualquer merge que dispare `terraform apply`:
+**Conta AWS pessoal (decidido em 14/11/2026):** os testes e o vídeo usam a conta pessoal do Júlio, não o Academy. O ambiente sobe para testar e é destruído logo depois; sobe de novo para gravar o vídeo e é destruído de novo. Antes do primeiro `apply`, falta:
+
+- criar as roles IAM no Terraform no lugar da `LabRole`, que só existe no Academy: cluster e node group em `infra-k8s/eks.tf`, Lambda em `lambda-auth/terraform/lambda.tf`;
+- configurar o profile `personal` do AWS CLI na máquina do Júlio e rodar tudo com `AWS_PROFILE=personal`, conferindo `aws sts get-caller-identity` antes de cada `apply` (há profiles de trabalho na mesma máquina);
+- usar Terraform 1.9.8, a versão dos workflows, e Node 22 (`.nvmrc` do `lambda-auth`);
+- `force_delete` no ECR, porque o `destroy` falha com imagens no repositório;
+- um caminho de `destroy` na ordem inversa, apagando antes os `Service`s do tipo LoadBalancer: os NLBs são criados pelo Kubernetes e, se ficarem órfãos, travam o `destroy` da VPC e continuam cobrando;
+- bucket de state, tabela de lock e um AWS Budget com alerta, criados uma vez e mantidos entre as subidas;
+
+**Secrets do GitHub:** os atuais são do Academy e estão expirados. Com o Actions fora, não são usados; ficam registrados para o caso de ele voltar:
 
 | Repositório | Dono | Secrets | Quem pode trocar |
 |---|---|---|---|
 | `infra-k8s` | Júlio | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Júlio |
 | `infra-db` | Júlio | os 3 da AWS e `DB_PASSWORD` | Júlio |
-| `lambda-auth` | Kauã | os 3 da AWS e `JWT_PRIVATE_KEY` | Kauã: o Júlio tem permissão `write`, e secrets exigem `admin` |
-| OS, Billing e Execução (`chore/ci`) | Kauã | `SONAR_TOKEN` (o deploy, quando entrar no workflow, vai pedir também os da AWS) | Kauã: o Júlio tem permissão `read` |
-
-As credenciais do Academy expiram a cada sessão: renovar os secrets a cada retomada (ponto de atenção 1).
+| `lambda-auth` | Kauã | os 3 da AWS e `JWT_PRIVATE_KEY` | Kauã: o Júlio tem permissão `write` (push), e secrets exigem `admin` |
+| OS, Billing e Execução (`chore/ci`) | Kauã | `SONAR_TOKEN` (o deploy, quando entrar no workflow, vai pedir também os da AWS) | Kauã: o Júlio tem `write` desde 14/11/2026, e secrets exigem `admin` |
 
 **Roteiro do Júlio (o que dá para fazer sem depender do Kauã):**
 
-1. Renovar as credenciais do Academy e trocar os secrets de `infra-k8s` e `infra-db` pelos da conta dele.
+1. Fazer as adaptações da conta pessoal listadas acima.
 2. Conferir na conta dele o backend do Terraform: bucket S3 `fiap-15soat-oficina-tfstate` e tabela de lock `fiap-15soat-oficina-tflock`, em `us-east-1`, criados uma vez fora do Terraform (`versions.tf` de `infra-k8s`, `infra-db` e `lambda-auth`). Se não existirem, criar; nome de bucket é global, então, se estiver ocupado por outra conta, trocar o `bucket` nos 3 `versions.tf`.
-3. Mergear `infra-k8s` e acompanhar o `terraform apply`. Numa conta sem nada, ele cria VPC, EKS, ECR e as filas SQS com as DLQs; o EKS demora.
-4. Mergear `infra-db` e acompanhar o `terraform apply`. Ele cria a RDS (que encontra a VPC pelo nome `oficina-vpc`, por isso vem depois) e a tabela DynamoDB `oficina-billing`.
+3. Rodar `terraform plan` e `terraform apply` de `infra-k8s` na máquina dele (o código já está em `main`). Numa conta sem nada, ele cria VPC, EKS, ECR e as filas SQS com as DLQs; o EKS demora.
+4. Rodar `terraform plan` e `terraform apply` de `infra-db`. Ele cria a RDS (que encontra a VPC pelo nome `oficina-vpc`, por isso vem depois) e a tabela DynamoDB `oficina-billing`.
 5. Conferir no console que as 3 filas, as 3 DLQs e a tabela existem, e marcar na Seção 0 a validação de SQS (D5) e DynamoDB (D6) e, nas Seções 2 e 6, os itens "na conta AWS".
-6. Se o Academy bloquear algum recurso (IAM, como na Fase 3), registrar o erro exato neste checklist, em "Pontos de atenção".
+6. Se algum recurso falhar, registrar o erro exato neste checklist, em "Pontos de atenção".
+7. Destruir tudo ao terminar, na ordem inversa, e conferir no console que não sobrou NLB, NAT Gateway nem EKS.
 
-Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os databases e as rotas do Gateway são o próximo trabalho (lista acima). O `lambda-auth` não deve ser mergeado antes do deploy dos serviços, e os secrets dele só o Kauã troca.
+Não dá para subir os serviços ainda: os manifestos, o ECR por serviço, os databases e as rotas do Gateway são o próximo trabalho (lista acima). O `apply` do `lambda-auth` só vem depois do deploy dos serviços.
 
-**Ordem de merge e `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
+**Ordem de `apply`:** `infra-k8s` → `infra-db` → deploy dos 3 serviços → `lambda-auth`. O `lambda-auth` encontra o NLB pela tag `kubernetes.io/service-name` (`terraform/rede.tf`); aplicado antes do deploy, o `terraform apply` falha.
 
-**Mercado Pago:** testar a cobrança na AWS exige conta e credenciais de teste do Mercado Pago (Seção 1). Sem elas, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
+**Mercado Pago:** as credenciais de teste existem desde 15/11/2026 (Seção 1). Localmente, `docker compose -f docker-compose.yml -f docker-compose.mercadopago.yml up -d --build --wait` usa a API real no lugar do WireMock, lendo o `.env` (modelo em `.env.example`); o BDD continua no WireMock. A API é a mesma para teste e produção (`api.mercadopago.com`): o ambiente vem da credencial. Na AWS, o token e o `external_pos_id` entram como `Secret` do Billing. Sem eles, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
 
 ### Decisões em aberto
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
-- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio; entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
+- **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
 
 Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
@@ -106,16 +118,16 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 08/11/2026: **141 pendentes, 187 concluídos, 2 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 15/11/2026: **139 pendentes, 191 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
 | 0. Decisões em aberto | 3 | Pequeno, mas trava o resto |
-| 1. Separação em Microsserviços | 9 | **Muito grande** |
+| 1. Separação em Microsserviços | 8 | **Muito grande** |
 | 2. Comunicação entre Microsserviços | 3 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 4 | Grande |
-| 5. CI/CD Automatizado | 37 | Médio |
+| 5. CI/CD Automatizado | 36 | Médio |
 | 6. Infraestrutura | 29 | Grande |
 | 7. Monitoramento e Observabilidade | 12 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
@@ -134,8 +146,8 @@ Decisões tomadas pelo Kauã em 02/11/2026. Só a D7 segue em aberto.
 | D2 | Negócio | O que acontece com pagamento recusado ou QR expirado? | Devolver estoque e levar a OS a um novo status `CANCELADA`, sem nova tentativa automática | [x] |
 | D3 | Negócio | A OS pode ter itens alterados depois de paga? | Não: adição e remoção bloqueadas; serviço extra vira outra OS | [x] |
 | D4 | Arquitetura | Onde ficam cliente, veículo, usuário, produto e estoque? | Cliente, veículo e usuário no OS Service; produto e estoque em Execução; 3 serviços no total | [x] |
-| D5 | Arquitetura | Tipo de Saga e broker | Orquestrada, com o orquestrador dentro do OS Service, e SQS (pendente validar no Academy) | [x] |
-| D6 | Arquitetura | Banco de cada serviço | DynamoDB no Billing, PostgreSQL nos outros dois (pendente validar no Academy; MongoDB é o plano B) | [x] |
+| D5 | Arquitetura | Tipo de Saga e broker | Orquestrada, com o orquestrador dentro do OS Service, e SQS (pendente validar na conta AWS) | [x] |
+| D6 | Arquitetura | Banco de cada serviço | DynamoDB no Billing, PostgreSQL nos outros dois (pendente validar na conta AWS; MongoDB é o plano B) | [x] |
 | D7 | Arquitetura | "Infraestrutura própria" aceita EKS compartilhado? | **Em aberto:** decidir com o Júlio e confirmar com o professor. Recomendação: um cluster só, com deploy e banco por serviço | [ ] |
 | D8 | Logística | Prazo de entrega | 17/11/2026 | [x] |
 | D9 | Negócio | O que acontece se o cliente não responder ao orçamento? | Quando o link vence, em 7 dias, a OS vai para `CANCELADA` | [x] |
@@ -173,9 +185,9 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 | 1 | `fiap-15soat-oficina-os` | Abertura, status, histórico, orquestração da Saga, cliente, veículo e usuário | criado; PR #1 mergeado |
 | 2 | `fiap-15soat-oficina-billing` | Orçamento, aprovação, pagamento, Mercado Pago | criado; PR #1 mergeado |
 | 3 | `fiap-15soat-oficina-execucao` | Fila, diagnóstico, reparo, produto e estoque | criado; PR #1 mergeado |
-| 4 | `fiap-15soat-oficina-lambda-auth` | Autenticação e API Gateway | PR #1 tira o acesso ao banco; rotas do Gateway pendentes (Seção 6) |
-| 5 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | VPC, EKS, ECR | PR #1 adiciona as filas; ECR e cluster pendentes (Seção 6) |
-| 6 | `fiap-15soat-oficina-infra-db` (do Júlio) | Bancos gerenciados | PR #1 adiciona o DynamoDB; bancos SQL pendentes (Seção 6) |
+| 4 | `fiap-15soat-oficina-lambda-auth` | Autenticação e API Gateway | Sem acesso ao banco, em `master` desde 14/11/2026 (PR #1); rotas do Gateway pendentes (Seção 6) |
+| 5 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | VPC, EKS, ECR | Filas em `main` desde 14/11/2026 (PR #1), sem `apply`; ECR e cluster pendentes (Seção 6) |
+| 6 | `fiap-15soat-oficina-infra-db` (do Júlio) | Bancos gerenciados | DynamoDB em `main` desde 14/11/2026 (PR #1), sem `apply`; bancos SQL pendentes (Seção 6) |
 
 - [x] Criar repositório `fiap-15soat-oficina-os`
 - [x] Criar repositório `fiap-15soat-oficina-billing`
@@ -214,7 +226,7 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 ### Integração com Mercado Pago
 
-- [ ] Criar conta e credenciais de teste
+- [x] Criar conta e credenciais de teste — em 15/11/2026: usuário vendedor de teste `3846952336`, loja `OFICINAMATRIZ` (`90050202`) e caixa `OFICINACAIXA1` (`140857597`), criados pela API; token no `.env` do OS, fora do git. Falta a conta compradora de teste
 - [x] Ler o token de variável de ambiente (`MERCADOPAGO_ACCESS_TOKEN`), nunca do repositório
 - [ ] Guardar o token como secret no ambiente real
 - [x] Gerar QR dinâmico para o valor do orçamento, testado contra o simulador
@@ -260,7 +272,7 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 - [x] Definir o que é REST síncrono e o que é evento
 - [x] Documentar o catálogo de eventos (nome, produtor, consumidor, payload)
-- [x] Escrever o broker em Terraform (D5) — `sqs.tf`, no PR #1 de `infra-k8s`, com `terraform validate` ok
+- [x] Escrever o broker em Terraform (D5) — `sqs.tf`, em `main` de `infra-k8s` desde 14/11/2026 (PR #1), com `terraform validate` ok
 - [ ] Provisionar o broker na conta AWS (D5)
 - [x] Criar as filas de cada fluxo no LocalStack (D5)
 - [ ] Criar as filas de cada fluxo na conta AWS (D5)
@@ -321,7 +333,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 |---|---|---|---|
 | Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`) | [x] | [x] | [x] |
 | PR da `chore/ci` aberto contra `main` (PR #2 de cada serviço) | [x] | [x] | [x] |
-| Workflow publicado no GitHub (na `main`) | [ ] | [ ] | [ ] |
+| Workflow publicado no GitHub (na `main`) | [x] | [x] | [x] |
 | Build | [ ] | [ ] | [ ] |
 | Testes automatizados | [ ] | [ ] | [ ] |
 | Verificação de qualidade (Sonar) | [ ] | [ ] | [ ] |
@@ -330,7 +342,7 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
 | Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
 
-O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`. A primeira execução não começou: o GitHub Actions da conta está bloqueado (ponto de atenção 8). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
+O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`; foi mergeado em 14/11/2026 nos 3 serviços. Nenhuma execução começou: o GitHub Actions está bloqueado, e foi decidido seguir sem ele (ponto de atenção 8). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
 
 ### Regras de proteção
 
@@ -338,12 +350,12 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 |---|---|---|---|---|---|---|
 | Branch principal chamada `main` | [x] | [x] | [x] | [ ] | [x] | [x] |
 | PR obrigatório | [ ] | [ ] | [ ] | [x] | [x] | [x] |
-| Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [?] | [?] |
+| Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [ ] | [ ] |
 
 Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está sem proteção (`Branch not protected`). Na `master` de `lambda-auth`, o PR é obrigatório, mas não há checagem obrigatória (`required_status_checks` vazio).
 
-`[?]`: em `infra-k8s` e `infra-db`, o `gh api` devolve 404 para a conta do Kauã, sem detalhar o motivo, e não há ruleset na `main`. Conferir com o Júlio, dono dos repositórios.
+Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`.
 
 ## 6. Infraestrutura
 
@@ -351,7 +363,7 @@ Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está s
 
 - [ ] ECR por serviço (hoje há só `${project_name}-api`)
 - [ ] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (hoje 2 nós `t3.medium`, máximo 3)
-- [x] Escrever broker e demais recursos no repositório escolhido (D5) — `sqs.tf`, no PR #1
+- [x] Escrever broker e demais recursos no repositório escolhido (D5) — `sqs.tf`, em `main` desde 14/11/2026
 - [ ] Aplicar broker e demais recursos na conta AWS (D5)
 - [ ] Confirmar o modelo de cluster com o professor (D7)
 
@@ -359,7 +371,7 @@ Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está s
 
 - [ ] Escrever os bancos SQL de cada serviço, sem compartilhar database (D6) — hoje há uma só instância `aws_db_instance`; decidido em 08/11/2026: a mesma instância, com os databases `oficina_os` e `oficina_execucao` e um usuário por serviço
 - [ ] Provisionar os bancos SQL na conta AWS (D6)
-- [x] Escrever o banco NoSQL (D6) — `dynamodb.tf`, no PR #1
+- [x] Escrever o banco NoSQL (D6) — `dynamodb.tf`, em `main` desde 14/11/2026
 - [ ] Provisionar o banco NoSQL na conta AWS (D6)
 - [ ] Restringir as credenciais: cada serviço só alcança o próprio banco
 
@@ -477,15 +489,15 @@ Execução não tem métrica própria, e as métricas do monólito ficaram no OS
 
 ## Pontos de atenção que atravessam as frentes
 
-1. **Credenciais AWS são temporárias (Academy).** Toda retomada começa por renovar as credenciais locais e os secrets do GitHub de todos os repositórios, agora em número maior. Na Fase 3 isso deixou pipelines vermelhas, e os `terraform plan` dos PRs atuais falharam por token expirado.
-2. **Restrições de IAM do Academy.** Na Fase 3, o módulo `terraform-aws-modules/eks` falhou por `iam:GetRole` e foi substituído por recursos nativos. Validar cedo os recursos novos (SQS, DynamoDB).
+1. **Custo da conta AWS pessoal.** Desde 14/11/2026 a AWS é a conta pessoal do Júlio, e cada hora ligada custa (EKS, NAT Gateway, nós, RDS, NLBs). Destruir tudo ao fim de cada uso, conferir no console que não sobrou nada e manter um AWS Budget com alerta. Os secrets do Academy, expirados, deixaram de valer: os `terraform plan` dos PRs falharam por token expirado.
+2. **Código feito para o Academy.** Na Fase 3, o módulo `terraform-aws-modules/eks` falhou por `iam:GetRole` e foi substituído por recursos nativos, e o EKS e a Lambda reutilizam a `LabRole`. Na conta pessoal a `LabRole` não existe: as roles precisam ser criadas no Terraform antes do primeiro `apply`.
 3. **Infraestrutura precisa estar no ar para gravar o vídeo.** Reservar tempo para subir tudo de novo, incluindo o ambiente com credenciais renovadas.
 4. **Webhook do Mercado Pago depende de URL pública estável.** Em desenvolvimento local é preciso um túnel ou simular a chamada.
 5. **Paridade funcional.** A divisão não pode perder comportamento da Fase 3: as regras de `OrdemServicoUseCase`, de `Cliente` e de estoque precisam ser conferidas contra a tabela de endpoints da Seção 1.
 6. **Falha de notificação.** Resolvido pela D20: orçamento *best-effort*, QR com 3 tentativas e depois falha de cobrança.
-7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. A evidência no README depende do CI rodando.
-8. **GitHub Actions bloqueado na conta `KauaAlmeidaSilveira`.** Em 08/11/2026, os jobs dos PRs #2 não começaram: "The job was not started because your account is locked due to a billing issue". O bloqueio continuou depois de rodar de novo. A página de cobrança não mostra nada devido, e a conta nunca pagou pelo GitHub. O Actions funcionou no `lambda-auth` em 03/11/2026, então o bloqueio começou depois. Próximo passo: abrir chamado no suporte do GitHub (support.github.com) com a mensagem exata. Enquanto isso, nenhum workflow roda nos repositórios dessa conta, inclusive o `terraform` do `lambda-auth`; os repositórios do Júlio não são afetados.
-9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o merge dispara `terraform apply`. Não fazer sem a conta AWS definida.
+7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. Sem o Actions, a evidência no README passa a ser o relatório do JaCoCo gerado localmente (print ou arquivo).
+8. **GitHub Actions bloqueado nas contas `KauaAlmeidaSilveira` e `JulioNCavalcanti`.** Em 08/11/2026, os jobs dos PRs #2 não começaram: "The job was not started because your account is locked due to a billing issue". O bloqueio continuou depois de rodar de novo. A página de cobrança não mostra nada devido, e a conta nunca pagou pelo GitHub. O Actions funcionou no `lambda-auth` em 03/11/2026, então o bloqueio começou depois. Próximo passo: abrir chamado no suporte do GitHub (support.github.com) com a mensagem exata. Enquanto isso, nenhum workflow roda nos repositórios dessa conta, inclusive o `terraform` do `lambda-auth`. Em 14/11/2026, a conta `JulioNCavalcanti` apresentou o mesmo bloqueio: os workflows de `main` de `infra-k8s` e `infra-db`, disparados pelo merge, não começaram, com a mesma mensagem; o de `master` do `lambda-auth` também não. O bloqueio é do GitHub, não da AWS. **Decidido em 14/11/2026: o Actions não volta, e tudo passa a ser manual.** Ficam sem atender, a menos que o Actions volte: pipeline de CI/CD com deploy automatizado por serviço, checagens automáticas obrigatórias na `main` e, no vídeo, o "deploy automatizado de pelo menos um microsserviço com validação de testes" (`docs/requisitos-fase4.md`).
+9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o push na branch principal dispara `terraform apply`, mas com o Actions bloqueado nada roda. Se o Actions voltar, `infra-k8s` e `infra-db` esperam aprovação no environment `producao`; em `lambda-auth` não há revisor, e o deploy roda na hora com os secrets que estiverem lá.
 
 ---
 
