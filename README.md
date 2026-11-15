@@ -80,6 +80,30 @@ cp src/main/resources/jwt.public.key src/main/resources/servico.public.key
 mvn verify
 ```
 
+## Qualidade (SonarQube)
+
+O enunciado pede validação de qualidade "via SonarQube ou similar no CI". O passo está no
+`.github/workflows/ci.yml` de cada serviço (SonarCloud, ligado pelo secret `SONAR_TOKEN`), mas o GitHub
+Actions das contas está bloqueado por billing. A validação roda localmente, com o mesmo quality gate:
+
+```bash
+sh scripts/sonar-local.sh          # sobe o SonarQube em Docker, roda mvn verify e a análise dos 3 serviços
+                                    # e espera o quality gate "Sonar way"; painel em http://localhost:9000
+```
+
+O script sai com erro se algum serviço falhar nos testes ou no gate. Resultado de 15/11/2026:
+
+| Serviço | Quality gate | Cobertura | Confiabilidade | Segurança | Revisão de segurança | Manutenibilidade | Duplicação |
+|---|---|---|---|---|---|---|---|
+| OS | Passou | 95,4% | A (0 bugs) | A (0 vulnerabilidades) | A (100% revisado) | A | 0% |
+| Execução | Passou | 94,4% | A (0 bugs) | A (0 vulnerabilidades) | A (100% revisado) | A | 0% |
+| Billing | Passou | 92,5% | A (0 bugs) | A (0 vulnerabilidades) | A (100% revisado) | A | 0% |
+
+Revisões registradas no SonarQube: CSRF desligado é seguro (APIs stateless, autenticação só por
+`Authorization: Bearer`, sem cookie nem sessão); CORS liberado é seguro (`allowCredentials=false`, token
+Bearer, entrada pelo API Gateway); a regra S5841 em `ExecucaoControllerTransacaoIT` é falso positivo (o teste
+afirma que um evento não foi publicado, e a lista vazia é o caso esperado).
+
 ## Documentos
 
 - [Checklist de entrega](CHECKLIST.md)
