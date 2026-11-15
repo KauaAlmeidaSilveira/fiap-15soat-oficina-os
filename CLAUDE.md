@@ -66,7 +66,10 @@ Não inventar. As decisões D1 a D23 estão na Seção 0 do checklist; caso omis
   npx -y newman@6 run postman/oficina-fase4.collection.json -e postman/oficina-fase4.environment.local.json
   ```
 
-  Resultado esperado hoje: 236 asserções, com 3 falhas só na pasta "Só na AWS: Login" (a Lambda não sobe
-  no Docker), ou seja, 233/233 no local.
+  Resultado esperado hoje: 237 asserções, com 4 falhas só na pasta "Só na AWS: Login" (a Lambda não sobe
+  no Docker), ou seja, 233/233 no local. Na AWS, a pasta de Login roda antes e grava `token` (ADMIN) e
+  `token_operador` (OPERADOR, exigido para criar, alterar e inativar produto).
+- Qualidade: `sh scripts/sonar-local.sh` (SonarQube em Docker, quality gate "Sonar way" nos 3 serviços). O
+  passo do CI usa SonarCloud, mas o Actions está bloqueado.
 - Teste reproduz produção: não limpar fila, cache ou estado para passar; não alterar nem pular teste
   existente sem combinar.

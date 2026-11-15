@@ -45,6 +45,12 @@
       "enabled": true
     },
     {
+      "key": "token_operador",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
       "key": "token_cliente",
       "value": "",
       "type": "secret",
