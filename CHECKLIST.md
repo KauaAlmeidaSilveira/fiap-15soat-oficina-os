@@ -73,7 +73,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** documentação (Seção 8), proteção de branch nos repositórios do Kauã (Seção 5) e a gravação do vídeo numa nova subida.
+7. **Próximos passos:** proteção de branch nos repositórios do Kauã (Seção 5), a gravação do vídeo numa nova subida e o PDF. A documentação da Seção 8 foi fechada em 16/11/2026.
 
 ### Ambiente na AWS
 
@@ -125,13 +125,13 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud: diagramas de sequência em Mermaid, ADRs, `README-DOCS.md`, cobertura nos READMEs de Billing e Execução, proteção de branch nos repositórios do Kauã, roteiro do vídeo e PDF.
+Dá para avançar sem cloud: proteção de branch nos repositórios do Kauã, roteiro do vídeo e PDF.
 
 ---
 
 ## Dimensão
 
-Contagem de 16/11/2026: **68 pendentes, 259 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **58 pendentes, 269 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -143,8 +143,8 @@ Contagem de 16/11/2026: **68 pendentes, 259 concluídos, 0 não verificáveis**.
 | 5. CI/CD Automatizado | 34 | Médio |
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
-| 8. Documentação da Arquitetura | 7 | Médio |
-| 9. Entregáveis | 21 | Médio |
+| 8. Documentação da Arquitetura | 0 | Médio |
+| 9. Entregáveis | 18 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -446,16 +446,16 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 ## 8. Documentação da Arquitetura
 
 - [x] **Diagrama geral da arquitetura final** com microsserviços, bancos e comunicação (exigido no PDF) — `docs/arquitetura.md`, em Mermaid, em 16/11/2026; levar ao PDF na Seção 9
-- [ ] Diagrama de sequência da Saga: fluxo feliz
-- [ ] Diagrama de sequência da Saga: fluxo com compensação
-- [ ] Diagrama de sequência do pagamento com Mercado Pago
+- [x] Diagrama de sequência da Saga: fluxo feliz — `docs/sequencias.md`, em 16/11/2026, da abertura à entrega
+- [x] Diagrama de sequência da Saga: fluxo com compensação — `docs/sequencias.md`, em 16/11/2026: QR expirado (F6) e cancelamento com reparo em andamento (F10), com o caminho de `EstornoFalhou`
+- [x] Diagrama de sequência do pagamento com Mercado Pago — `docs/sequencias.md`, em 16/11/2026: order, QR por e-mail, webhook com assinatura e consulta, reembolso
 - [x] Diagrama ER ou modelo de dados de cada serviço, gerado por Mermaid — em 16/11/2026, seção "Modelo de dados" no README de cada serviço: ER do PostgreSQL no OS e na Execução, e tabela única do DynamoDB (itens, chaves e GSI) no Billing
 - [x] **Descrição da estratégia de Saga** (exigido no PDF) — no README do OS; levar ao PDF na Seção 9
 - [x] **Justificativa da divisão dos microsserviços e das tecnologias** (exigido no PDF) — `docs/arquitetura.md`, em 16/11/2026: dono de cada dado, alternativas descartadas e uma tabela de tecnologias com o porquê; levar ao PDF na Seção 9
-- [ ] ADR da Saga
-- [ ] ADR de mensageria, substituindo a ADR-0002 (comunicação síncrona via REST)
-- [ ] ADR ou RFC do banco NoSQL
-- [ ] Migrar as ADRs e RFCs da Fase 3 que continuam válidas
+- [x] ADR da Saga — `docs/adr/0003-saga-orquestrada.md`, em 16/11/2026
+- [x] ADR de mensageria, substituindo a ADR-0002 (comunicação síncrona via REST) — `docs/adr/0004-mensageria-sqs.md`, em 16/11/2026; a ADR-0002 ficou como histórico, marcada como substituída
+- [x] ADR ou RFC do banco NoSQL — `docs/rfc/0004-banco-nosql-dynamodb.md`, em 16/11/2026
+- [x] Migrar as ADRs e RFCs da Fase 3 que continuam válidas — em 16/11/2026: ADR-0001 (HPA) e RFCs 0001 (AWS), 0002 (PostgreSQL) e 0003 (autenticação) em `docs/adr/` e `docs/rfc/`, com o texto original e uma seção "Na Fase 4"
 
 ## 9. Entregáveis
 
@@ -467,7 +467,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | `Dockerfile` | [x] | [x] | [x] |
 | Manifestos Kubernetes | [x] | [x] | [x] |
 | Pipeline de CI/CD | [ ] | [ ] | [ ] |
-| Evidência de cobertura no README (print ou link) | [x] | [ ] | [ ] |
+| Evidência de cobertura no README (print ou link) | [x] | [x] | [x] |
 | Documentação da arquitetura do serviço | [x] | [x] | [x] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
 | Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
@@ -475,12 +475,12 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [x] | [x] | [x] |
 
-Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: só o README do OS tem, na tabela do SonarQube local de 15/11/2026 da seção "Qualidade" (com os números dos 3 serviços); os de Billing e Execução não citam cobertura.
+Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: no OS, a tabela do SonarQube local de 15/11/2026 da seção "Qualidade"; em Billing e Execução, a seção "Cobertura e qualidade" (16/11/2026), com o `mvn verify` local (Billing: 93 testes, 94,9% de instruções; Execução: 85 testes, 95,8%) e o resultado do SonarQube. "Pipeline de CI/CD" segue pendente: o `ci.yml` está em `main` nos 3, mas nunca rodou (Actions bloqueado).
 
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
 - [x] READMEs de `infra-k8s` e `infra-db` atualizados — e o de `lambda-auth`, para a Fase 4
-- [ ] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3
+- [x] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3 — na raiz do OS, em 16/11/2026: requisito do enunciado → onde ver, linkado no README
 - [x] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`) — em 15/11/2026: título e papel de cada serviço, autenticação por Bearer JWT com botão Authorize, versão 4.0.0 (branches `fix/descricao-swagger`)
 - [x] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar) — conferido em 16/11/2026: colaborador com `write` nos 6 repositórios, sem convite pendente
 
