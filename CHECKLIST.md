@@ -69,9 +69,9 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 2. **PRs de infra:** `infra-k8s`, `infra-db` e `lambda-auth` mergeados em 14/11/2026, sem `apply` (ver "Ações na nuvem já feitas"). Antes do primeiro `apply`, adaptar à conta pessoal (ver "Antes de testar na AWS"). A ordem de `apply` continua valendo, com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
-5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. Falta o SonarCloud.
+5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** documentação (Seção 8), SonarCloud e a gravação do vídeo numa nova subida.
+7. **Próximos passos:** documentação (Seção 8), proteção de branch nos repositórios do Kauã (Seção 5) e a gravação do vídeo numa nova subida.
 
 ### Ambiente na AWS
 
@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 15/11/2026: **81 pendentes, 246 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **79 pendentes, 248 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -138,7 +138,7 @@ Contagem de 15/11/2026: **81 pendentes, 246 concluídos, 0 não verificáveis**.
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
-| 5. CI/CD Automatizado | 36 | Médio |
+| 5. CI/CD Automatizado | 34 | Médio |
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 10 | Médio |
@@ -237,7 +237,7 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 
 ### Integração com Mercado Pago
 
-- [x] Criar conta e credenciais de teste — em 15/11/2026: usuário vendedor de teste `3846952336`, loja `OFICINAMATRIZ` (`90050202`) e caixa `OFICINACAIXA1` (`140857597`), criados pela API; token no `.env` do OS, fora do git. Falta a conta compradora de teste
+- [x] Criar conta e credenciais de teste — em 15/11/2026: usuário vendedor de teste `3846952336`, loja `OFICINAMATRIZ` (`90050202`) e caixa `OFICINACAIXA1` (`140857597`), criados pela API; token no `.env` do OS, fora do git; conta compradora de teste criada no mesmo dia, usada para pagar o QR
 - [x] Ler o token de variável de ambiente (`MERCADOPAGO_ACCESS_TOKEN`), nunca do repositório
 - [x] Guardar o token como secret no ambiente real — validado na AWS em 15/11/2026: `Secret` `oficina-billing-secrets`, criado pelo `deploy-aws.sh` a partir do `.env`
 - [x] Gerar QR dinâmico para o valor do orçamento, testado contra o simulador
@@ -364,11 +364,13 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 | Branch principal chamada `main` | [x] | [x] | [x] | [ ] | [x] | [x] |
 | PR obrigatório | [ ] | [ ] | [ ] | [x] | [x] | [x] |
 | Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [ ] | [ ] |
+| Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [x] | [x] |
 
 Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está sem proteção (`Branch not protected`). Na `master` de `lambda-auth`, o PR é obrigatório, mas não há checagem obrigatória (`required_status_checks` vazio).
 
-Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`.
+Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`. Em 16/11/2026 a regra passou a valer também para administradores (`enforce_admins`), e o push direto do Júlio na `main` dos dois foi recusado (`GH006: Protected branch update failed`).
+
+Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`: falta o Kauã aplicar a mesma regra (PR obrigatório, valendo para administradores, sem force push nem exclusão) e renomear a `master` do `lambda-auth` para `main` (o `ci-cd.yml` já aceita as duas). Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
 
 ## 6. Infraestrutura
 
