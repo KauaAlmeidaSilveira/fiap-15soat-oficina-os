@@ -43,6 +43,11 @@ Os eventos `Oficina*` são eventos customizados do agente (`EventosNewRelic`): n
 Mensagem na DLQ não tem alerta: o tamanho da fila é métrica do CloudWatch e só chega ao New Relic com a
 integração AWS da conta. O efeito visível na aplicação (Saga parada ou com compensação falha) está coberto.
 
+## Evidências
+
+Prints de 17/11/2026, com o ambiente no ar: dashboard (4 abas), trace distribuído atravessando o SQS, APM dos 3
+serviços e condições de alerta, em [`docs/evidencias/new-relic/`](../docs/evidencias/new-relic/README.md).
+
 ## Aplicar
 
 ```bash
