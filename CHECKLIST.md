@@ -73,7 +73,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** a gravação do vídeo numa nova subida e o PDF. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
+7. **Próximos passos:** mergear os PRs de documentação (OS #15, Billing #9, Execução #8, lambda-auth #4), gravar o vídeo numa nova subida, preencher o link no PDF e gerá-lo de novo. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
 
 ### Ambiente na AWS
 
@@ -125,13 +125,13 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud: roteiro do vídeo e PDF.
+Dá para avançar sem cloud: merge dos PRs de documentação e roteiro do vídeo.
 
 ---
 
 ## Dimensão
 
-Contagem de 16/11/2026: **49 pendentes, 278 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **44 pendentes, 283 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -144,7 +144,7 @@ Contagem de 16/11/2026: **49 pendentes, 278 concluídos, 0 não verificáveis**.
 | 6. Infraestrutura | 0 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
-| 9. Entregáveis | 18 | Médio |
+| 9. Entregáveis | 13 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -497,13 +497,13 @@ Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mer
 
 ### Entrega no Portal do Aluno (PDF)
 
-- [ ] Nome e identificação dos participantes
-- [ ] Links dos repositórios
-- [ ] Link do vídeo de até 15 minutos
-- [ ] Diagrama geral da arquitetura final
-- [ ] Descrição da estratégia escolhida para a Saga
-- [ ] Justificativa da divisão dos microsserviços e das tecnologias
-- [ ] Conferir que todos os links abrem sem login, ou com o acesso do avaliador
+- [x] Nome e identificação dos participantes — no `entrega/entrega-fase4.pdf` (gerado de `entrega-fase4.html`, na pasta de trabalho, fora do git), seção 1: nome, RM e GitHub dos dois
+- [x] Links dos repositórios — seção 2 do PDF, os 6 repositórios; conferido em 16/11/2026 que abrem sem login (HTTP 200)
+- [ ] Link do vídeo de até 15 minutos — no PDF ainda está `{preencher}` (seção 3)
+- [x] Diagrama geral da arquitetura final — seção 4 do PDF, o mesmo de `docs/arquitetura.md`
+- [x] Descrição da estratégia escolhida para a Saga — seção 5 do PDF: orquestração, compensações, garantias e alternativas
+- [x] Justificativa da divisão dos microsserviços e das tecnologias — seções 6 e 7 do PDF
+- [ ] Conferir que todos os links abrem sem login, ou com o acesso do avaliador — em 16/11/2026: os 6 repositórios abrem; o link do PDF para `README-DOCS.md` e as citações a `docs/sequencias.md` e `docs/adr/0003-saga-orquestrada.md` dão 404 até o merge do [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15); falta também o link do vídeo
 
 ---
 
