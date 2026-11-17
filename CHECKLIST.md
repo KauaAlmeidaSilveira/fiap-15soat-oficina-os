@@ -131,7 +131,7 @@ Dá para avançar sem cloud: merge dos PRs de documentação e roteiro do vídeo
 
 ## Dimensão
 
-Contagem de 16/11/2026: **41 pendentes, 286 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **40 pendentes, 287 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -142,7 +142,7 @@ Contagem de 16/11/2026: **41 pendentes, 286 concluídos, 0 não verificáveis**.
 | 4. Testes e Qualidade | 0 | Grande |
 | 5. CI/CD Automatizado | 27 | Médio |
 | 6. Infraestrutura | 0 | Grande |
-| 7. Monitoramento e Observabilidade | 1 | Médio |
+| 7. Monitoramento e Observabilidade | 0 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
 | 9. Entregáveis | 13 | Médio |
 | Higiene do repositório | 0 | Pequeno |
@@ -441,7 +441,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 - [x] Criar painel de pagamentos — a partir dos eventos publicados pelo Billing (`OficinaMensagemPublicada`) e de `OficinaIntegracaoFalha`
 - [x] Criar alerta para falha de Saga e fila parada ou com DLQ — o alerta de DLQ foi dispensado pelo Kauã em 16/11/2026; Saga (`COMPENSACAO_FALHOU`), falha de cobrança ou estorno, integração, erro, latência e serviço sem dados aplicados em 15/11/2026 (`observability/alertas.tf`, e-mail); a DLQ fica de fora (métrica do CloudWatch, exige integrar a conta AWS ao New Relic)
 - [x] Definir o novo repositório de `observability/`, que hoje mora na `api` — no OS, junto do compose e do Postman
-- [ ] Validar tudo com a infraestrutura no ar, como na Fase 3 — em 17/11/2026, com o ambiente no ar, conferidos APM dos 3 serviços, as 4 abas do dashboard com dados, logs com o mesmo `correlationId` nos 3 serviços, o trace pelo SQS e as condições de alerta (prints em `docs/evidencias/new-relic/`). Falta ver com dados o painel de Pagamentos e as Sagas encerradas: nessa subida nenhum orçamento tinha sido aprovado (6 OS, Sagas até `AGUARDANDO_DECISAO`)
+- [x] Validar tudo com a infraestrutura no ar, como na Fase 3 — em 17/11/2026, com o ambiente no ar: APM dos 3 serviços, as 4 abas do dashboard com dados, logs com o mesmo `correlationId` nos 3 serviços, o trace pelo SQS e as condições de alerta; e a OS 16 de ponta a ponta (Saga `3a57a001-d264-45e0-b264-3b54e97df6b2`), com pagamento real de teste no Mercado Pago, `PagamentoConfirmado` e Saga `CONCLUIDA` (2 cobranças pagas e 1 Saga concluída no dashboard). Prints em `docs/evidencias/new-relic/`. O aviso de pagamento da OS 16 entrou pela rota do webhook chamada pelo Postman: a notificação automática do Mercado Pago não chegou para essa order
 
 ## 8. Documentação da Arquitetura
 
