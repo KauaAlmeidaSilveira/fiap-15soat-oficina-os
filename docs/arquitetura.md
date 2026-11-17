@@ -2,7 +2,8 @@
 
 Visão geral do sistema da oficina depois da divisão do monólito da Fase 3 em microsserviços: componentes,
 bancos, comunicação e por que cada escolha foi feita. A estratégia de Saga está no [README](../README.md#saga-orquestrada)
-e o catálogo de comandos e eventos em [plano-secoes-0-4.md](plano-secoes-0-4.md#4-catálogo-de-eventos).
+e o catálogo de comandos e eventos em [plano-secoes-0-4.md](plano-secoes-0-4.md#4-catálogo-de-eventos). Os fluxos
+passo a passo estão em [sequencias.md](sequencias.md), e as decisões em [adr/](adr/README.md) e [rfc/](rfc/README.md).
 
 ## Diagrama geral
 
