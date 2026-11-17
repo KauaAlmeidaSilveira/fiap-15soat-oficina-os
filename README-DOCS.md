@@ -46,7 +46,7 @@ estado item a item, com datas e o que ficou de fora, está no [`CHECKLIST.md`](C
 | `main` protegida | Seção 5 do [`CHECKLIST.md`](CHECKLIST.md), com o estado de cada repositório |
 | Dockerfile e manifestos Kubernetes | `Dockerfile` e `k8s/` em cada serviço (`Deployment`, `Service`, `ConfigMap`, `HPA`, probes, requests e limits) |
 | Mensageria na infraestrutura | `sqs.tf` em [`infra-k8s`](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s): 3 filas, cada uma com DLQ |
-| Monitoramento e observabilidade (New Relic) | [`observability/`](observability/README.md): dashboard e alertas em Terraform; trace pelo SQS; logs com `X-Correlation-Id` e ID da Saga |
+| Monitoramento e observabilidade (New Relic) | [`observability/`](observability/README.md): dashboard e alertas em Terraform; trace pelo SQS; logs com `X-Correlation-Id` e ID da Saga. Prints de 17/11/2026 em [`docs/evidencias/new-relic/`](docs/evidencias/new-relic/README.md) |
 | Swagger e Postman | Swagger em cada serviço (`/swagger-ui.html`); collection em [`postman/`](postman/) |
 
 ## Rodar
