@@ -1,6 +1,6 @@
 # Checklist de Entrega — Tech Challenge Fase 4
 
-> Estado conferido em 16/11/2026 contra o código, as branches, os PRs, as execuções do Actions, os colaboradores e as regras de proteção de cada repositório.
+> Estado conferido em 17/11/2026 contra o código, as branches, os PRs, as execuções do Actions, os colaboradores e as regras de proteção de cada repositório.
 > Legenda: `[ ]` pendente · `[x]` concluído · `[?]` não verificável localmente (falta ferramenta/credencial, não falta de trabalho). Sem status "parcial": um item composto por várias partes vira uma linha por parte, cada uma binária. Por isso, o que está pronto no local e falta validar no ambiente real aparece em duas linhas.
 > `(Dn)` indica que o item depende da decisão `n` da Seção 0.
 
@@ -12,7 +12,7 @@
 
 **Regra vigente:** avanço sozinho só no desenvolvimento local. Subir ou destruir na AWS, criar recurso no Mercado Pago, push, PR e merge só com pedido explícito de quem opera (Júlio ou Kauã).
 
-**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026. A AWS é a conta pessoal do Júlio e o GitHub Actions está fora: tudo roda manualmente, pelos scripts do OS. **Em 15/11/2026 o sistema subiu inteiro na AWS e uma OS foi do início à entrega pelo API Gateway, com Mercado Pago real (credenciais de teste), webhook assinado e e-mails pelo Gmail; o ambiente foi destruído em seguida.** O código dessa subida foi mergeado em 15/11/2026 na branch principal dos 6 repositórios (ver "Ações na nuvem já feitas"); o roteiro para subir de novo está em `SUBIR-AMBIENTE.md`, na pasta de trabalho.
+**Em uma frase:** o código das Seções 0 a 4 dos 3 serviços está em `main` desde 08/11/2026, e o de `infra-k8s`, `infra-db` e `lambda-auth` desde 14/11/2026. A AWS é a conta pessoal do Júlio. O GitHub Actions voltou nas duas contas em 17/11/2026 (ponto de atenção 8), mas o deploy dos serviços continua manual, pelos scripts do OS; só o `lambda-auth` já faz deploy pelo Actions. **Em 15/11/2026 o sistema subiu inteiro na AWS e uma OS foi do início à entrega pelo API Gateway, com Mercado Pago real (credenciais de teste), webhook assinado e e-mails pelo Gmail; o ambiente foi destruído em seguida.** O código dessa subida foi mergeado em 15/11/2026 na branch principal dos 6 repositórios (ver "Ações na nuvem já feitas"); o roteiro para subir de novo está em `SUBIR-AMBIENTE.md`, na pasta de trabalho.
 
 ### O que existe hoje
 
@@ -25,9 +25,9 @@
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
 
-As branches de trabalho acima já foram mergeadas; em 16/11/2026 os 6 repositórios estão com `main` em dia (a `master` do `lambda-auth` foi renomeada para `main` no mesmo dia). PRs abertos em rascunho, na branch `docs/documentacao`: [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15) (diagramas de sequência, ADRs, RFCs, `README-DOCS.md` e este checklist), [Billing #9](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/9) e [Execução #8](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/8) (cobertura no README) e [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4) (README citando `main`).
+As branches de trabalho acima já foram mergeadas; em 16/11/2026 os 6 repositórios estão com `main` em dia (a `master` do `lambda-auth` foi renomeada para `main` no mesmo dia). PRs de documentação, na branch `docs/documentacao`, todos mergeados: [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15) (diagramas de sequência, ADRs, RFCs, `README-DOCS.md` e este checklist), [Billing #9](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/9) e [Execução #8](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/8) (cobertura no README) e [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4) (README citando `main`).
 
-O workflow de CI (`ci.yml`) está em `main` nos 3 serviços desde 14/11/2026 ([OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2) mergeados pelo Kauã, [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2) pelo Júlio), sem nunca ter rodado: o GitHub Actions das duas contas está bloqueado por billing (ponto de atenção 8). **Decidido em 14/11/2026: o Actions não volta, e build, testes, `apply` e deploy passam a ser manuais, da máquina do Júlio.** O código dos 3 serviços, de `infra-k8s`, de `infra-db` e de `lambda-auth` está em `main`/`master`; não há PR aberto.
+O workflow de CI (`ci.yml`) está em `main` nos 3 serviços desde 14/11/2026 ([OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2) mergeados pelo Kauã, [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2) pelo Júlio). Ficou parado até 17/11/2026, quando o GitHub Actions voltou nas duas contas (ponto de atenção 8). Desde então, na Execução o run de `main` ficou verde. No OS e no Billing o build falha só no `LogbackJsonConfigIT` (2 testes, que passam local e falham no runner, provável dependência de ordem; ainda não corrigido). No OS, o job de BDD com o sistema inteiro passou. O passo do SonarCloud é pulado (sem `SONAR_TOKEN`). Imagem no ECR e deploy não estão no `ci.yml`: o deploy dos serviços segue manual, da máquina do Júlio.
 
 Para ver o sistema funcionando, a partir de `fiap-15soat-oficina-os`, com o Docker ligado e os repositórios de Execução e Billing na pasta vizinha:
 
@@ -63,17 +63,18 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 - Segunda subida com 1 node `r6g.medium` (1 vCPU): tudo no ar depois de três ajustes (SMTP fora do health check do Billing, requests de CPU de 50m, JDK 21 no `mvn`). Newman: Login 3/3; Catálogo 26/49, com as falhas em cascata do token único (Seção 4). Fluxo completo feito à mão pelo Gateway até `ENTREGUE`.
 - Mercado Pago: webhook cadastrado no Modo de teste do painel; a primeira notificação assinada deu 401 e levou à correção da assinatura.
 - Ambiente destruído no fim do dia por `destruir-aws.sh` (109 recursos; conferido que não sobrou VPC, instância, NLB, NAT, EKS, RDS, ECR, fila, Lambda nem Gateway).
-- PRs mergeados pelo Júlio no mesmo dia, sem CI (Actions bloqueado): `infra-k8s` #2, `infra-db` #2, `lambda-auth` #2 e #3, Execução #3 e #4, Billing #3 e #4 e OS (`feat/deploy-aws`). Depois, também sem CI: Billing #5 a #7 e Execução #5 e #6 (trace pelo SQS, webhook de order inexistente, probes) em 15/11/2026, e OS #10 a #13 (probes, proteção de branch da infra, diagrama e justificativa da arquitetura) até 16/11/2026, e o modelo de dados nos READMEs (OS #14, Billing #8, Execução #7) em 16/11/2026. As execuções disparadas por esses merges seguem recusadas com "The job was not started because your account is locked due to a billing issue" (última conferida: OS, 17/11/2026 01:28 UTC).
+- PRs mergeados pelo Júlio no mesmo dia, sem CI (Actions bloqueado): `infra-k8s` #2, `infra-db` #2, `lambda-auth` #2 e #3, Execução #3 e #4, Billing #3 e #4 e OS (`feat/deploy-aws`). Depois, também sem CI: Billing #5 a #7 e Execução #5 e #6 (trace pelo SQS, webhook de order inexistente, probes) em 15/11/2026, e OS #10 a #13 (probes, proteção de branch da infra, diagrama e justificativa da arquitetura) até 16/11/2026, e o modelo de dados nos READMEs (OS #14, Billing #8, Execução #7) em 16/11/2026. As execuções disparadas por esses merges seguem recusadas com "The job was not started because your account is locked due to a billing issue" (última conferida: OS, 17/11/2026 01:28 UTC). Desde 17/11/2026 o Actions roda de novo nas duas contas (ponto de atenção 8).
+- Em 17/11/2026, o Júlio criou na conta AWS, fora do Terraform, o usuário IAM `github-actions-lambda-auth` e a política gerenciada de mesmo nome. A política dá só o que o Terraform do `lambda-auth` usa, e os dois têm a tag `remover-ao-destruir=sim`. A chave do usuário foi gravada nos secrets `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` do `lambda-auth`, e `JWT_PRIVATE_KEY` recebeu a chave de sessão local. O `AWS_SESSION_TOKEN` do Academy foi apagado. No [lambda-auth #5](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/5), o CI de PR passou (testes, validação e `plan`). O merge rodou o deploy pelo Actions, com `apply` (`0 added, 1 changed`) e smoke test verdes: é o primeiro deploy automatizado na conta pessoal. **Remover o usuário, a política e os 2 secrets quando o ambiente for destruído** (comandos na seção 5 do `SUBIR-AMBIENTE.md`).
 
 ### Por onde retomar
 
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra:** `infra-k8s`, `infra-db` e `lambda-auth` mergeados em 14/11/2026, sem `apply` (ver "Ações na nuvem já feitas"). Antes do primeiro `apply`, adaptar à conta pessoal (ver "Antes de testar na AWS"). A ordem de `apply` continua valendo, com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
-4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
+4. **CI:** o Actions voltou em 17/11/2026 nas duas contas. Falta corrigir o `LogbackJsonConfigIT`, que deixa o OS e o Billing vermelhos no runner. Falta também o `SONAR_TOKEN` para o passo do Sonar, e a imagem no ECR e o deploy no `ci.yml` dos serviços. O `lambda-auth` já faz deploy pelo Actions, com o usuário IAM `github-actions-lambda-auth`. Build e deploy dos serviços seguem pela máquina do Júlio (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** mergear os PRs de documentação (OS #15, Billing #9, Execução #8, lambda-auth #4), gravar o vídeo numa nova subida, preencher o link no PDF e gerá-lo de novo. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
+7. **Próximos passos:** gravar o vídeo numa nova subida, preencher o link no PDF e gerá-lo de novo. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
 
 ### Ambiente na AWS
 
@@ -91,17 +92,17 @@ Escrito e aplicado em 15/11/2026, e mergeado no mesmo dia na branch principal do
 - usar Terraform 1.9.8, a versão dos workflows, e Node 22 (`.nvmrc` do `lambda-auth`);
 - rodar `scripts/aws-bootstrap.sh` uma vez (bucket de state, tabela de lock e AWS Budget com alerta);
 - preencher no `.env` do OS o `NEW_RELIC_LICENSE_KEY` e o Gmail do envio de e-mail (`GMAIL_SMTP_USERNAME` e `GMAIL_SMTP_PASSWORD`, uma senha de app); sem o Gmail, orçamento e QR não chegam ao cliente;
-- a sessão do profile `personal` é do usuário root da conta: preferir um usuário ou role IAM com permissão de administrador (ainda root);
+- a sessão do profile `personal` é do usuário root da conta: preferir um usuário ou role IAM com permissão de administrador (ainda root). Para o Actions do `lambda-auth`, existe desde 17/11/2026 o usuário restrito `github-actions-lambda-auth`;
 - por causa da cota de 1 vCPU, `infra-k8s/terraform.tfvars` (gitignorado) fixa 1 node `r6g.medium`, e a subida roda com `SEM_NRI_BUNDLE=1`.
 
-**Secrets do GitHub:** os atuais são do Academy e estão expirados. Com o Actions fora, não são usados; ficam registrados para o caso de ele voltar:
+**Secrets do GitHub:** exceto no `lambda-auth`, os atuais são do Academy e estão expirados:
 
 | Repositório | Dono | Secrets | Quem pode trocar |
 |---|---|---|---|
 | `infra-k8s` | Júlio | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Júlio |
 | `infra-db` | Júlio | os 3 da AWS e `DB_PASSWORD` | Júlio |
-| `lambda-auth` | Kauã | os 3 da AWS e `JWT_PRIVATE_KEY` | Kauã: o Júlio tem permissão `write` (push), e secrets exigem `admin` |
-| OS, Billing e Execução (`chore/ci`) | Kauã | `SONAR_TOKEN` (o deploy, quando entrar no workflow, vai pedir também os da AWS) | Kauã: o Júlio tem `write` desde 14/11/2026, e secrets exigem `admin` |
+| `lambda-auth` | Kauã | desde 17/11/2026, `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` do usuário IAM `github-actions-lambda-auth` e `JWT_PRIVATE_KEY` com a chave de sessão local (`DB_PASSWORD` sobrou, sem uso) | Júlio ou Kauã: com `write`, o `gh secret set` funcionou |
+| OS, Billing e Execução (`chore/ci`) | Kauã | `SONAR_TOKEN` (o deploy, quando entrar no workflow, vai pedir também os da AWS) | Júlio ou Kauã (`write` basta, conferido no `lambda-auth` em 17/11/2026) |
 
 **Roteiro do Júlio (o que dá para fazer sem depender do Kauã):**
 
@@ -131,7 +132,7 @@ Dá para avançar sem cloud: merge dos PRs de documentação e roteiro do vídeo
 
 ## Dimensão
 
-Contagem de 16/11/2026: **41 pendentes, 286 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 17/11/2026: **39 pendentes, 288 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -140,7 +141,7 @@ Contagem de 16/11/2026: **41 pendentes, 286 concluídos, 0 não verificáveis**.
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
-| 5. CI/CD Automatizado | 27 | Médio |
+| 5. CI/CD Automatizado | 25 | Médio |
 | 6. Infraestrutura | 0 | Grande |
 | 7. Monitoramento e Observabilidade | 1 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
@@ -349,15 +350,15 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Workflow de build, testes, cobertura e Sonar escrito (branch `chore/ci`) | [x] | [x] | [x] |
 | PR da `chore/ci` aberto contra `main` (PR #2 de cada serviço) | [x] | [x] | [x] |
 | Workflow publicado no GitHub (na `main`) | [x] | [x] | [x] |
-| Build | [ ] | [ ] | [ ] |
-| Testes automatizados | [ ] | [ ] | [ ] |
+| Build | [ ] | [ ] | [x] |
+| Testes automatizados | [ ] | [ ] | [x] |
 | Verificação de qualidade (Sonar) | [ ] | [ ] | [ ] |
 | Build e push da imagem no ECR | [ ] | [ ] | [ ] |
 | Deploy automatizado no Kubernetes | [ ] | [ ] | [ ] |
 | Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
 | Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
 
-O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`; foi mergeado em 14/11/2026 nos 3 serviços. Nenhuma execução começou: o GitHub Actions está bloqueado, e foi decidido seguir sem ele (ponto de atenção 8). O workflow só roda em PR ou push para `main`. As linhas de Build, Testes e Sonar só fecham quando ele rodar no GitHub. Imagem no ECR e deploy ainda não estão no workflow.
+O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`; foi mergeado em 14/11/2026 nos 3 serviços. Com o Actions de volta em 17/11/2026, o run de `main` da Execução ficou verde, com build, testes e gate de 80% ([run](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/actions/runs/44009956946)). No OS e no Billing, o build falha só no `LogbackJsonConfigIT`, que passa local e falha no runner (ainda não corrigido). No OS, o job de BDD passou. O passo do Sonar é pulado sem `SONAR_TOKEN`. O workflow só roda em PR ou push para `main`. Imagem no ECR e deploy ainda não estão no workflow.
 
 ### Regras de proteção
 
@@ -372,7 +373,7 @@ Em 16/11/2026, o Kauã aplicou na `main` dos 3 serviços a mesma regra da infra:
 
 Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`. Em 16/11/2026 a regra passou a valer também para administradores (`enforce_admins`), e o push direto do Júlio na `main` dos dois foi recusado (`GH006: Protected branch update failed`).
 
-Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`. Em 16/11/2026, a `master` do `lambda-auth` foi renomeada para `main` pela API do GitHub: a proteção acompanhou a branch, a padrão passou a ser `main` e o `ci-cd.yml` já aceitava as duas. Clones antigos precisam de `git branch -m master main && git fetch origin && git branch -u origin/main main && git remote set-head origin -a`. O README foi ajustado no [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4). Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
+Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`. Em 16/11/2026, a `master` do `lambda-auth` foi renomeada para `main` pela API do GitHub: a proteção acompanhou a branch, a padrão passou a ser `main` e o `ci-cd.yml` já aceitava as duas. Clones antigos precisam de `git branch -m master main && git fetch origin && git branch -u origin/main main && git remote set-head origin -a`. O README foi ajustado no [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4). Checagem obrigatória ficou de fora enquanto o Actions estava bloqueado, porque um check que nunca roda travaria todo merge. Com ele de volta (17/11/2026), dá para exigir o check depois que o CI do OS e do Billing ficar verde.
 
 ## 6. Infraestrutura
 
@@ -475,7 +476,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [x] | [x] | [x] |
 
-Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: no OS, a tabela do SonarQube local de 15/11/2026 da seção "Qualidade"; em Billing e Execução, a seção "Cobertura e qualidade" (16/11/2026), com o `mvn verify` local (Billing: 93 testes, 94,9% de instruções; Execução: 85 testes, 95,8%) e o resultado do SonarQube. "Pipeline de CI/CD" segue pendente: o `ci.yml` está em `main` nos 3, mas nunca rodou (Actions bloqueado).
+Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: no OS, a tabela do SonarQube local de 15/11/2026 da seção "Qualidade"; em Billing e Execução, a seção "Cobertura e qualidade" (16/11/2026), com o `mvn verify` local (Billing: 93 testes, 94,9% de instruções; Execução: 85 testes, 95,8%) e o resultado do SonarQube. "Pipeline de CI/CD" segue pendente: o `ci.yml` roda desde 17/11/2026, mas só tem build, testes e Sonar, e no OS e no Billing ainda falha no `LogbackJsonConfigIT`.
 
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
@@ -516,8 +517,8 @@ Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mer
 5. **Paridade funcional.** A divisão não pode perder comportamento da Fase 3: as regras de `OrdemServicoUseCase`, de `Cliente` e de estoque precisam ser conferidas contra a tabela de endpoints da Seção 1.
 6. **Falha de notificação.** Resolvido pela D20: orçamento *best-effort*, QR com 3 tentativas e depois falha de cobrança.
 7. **Cobertura local não é evidência.** Os números da Retomada vêm de execuções locais do JaCoCo. Sem o Actions, a evidência no README passa a ser o relatório do JaCoCo gerado localmente (print ou arquivo).
-8. **GitHub Actions bloqueado nas contas `KauaAlmeidaSilveira` e `JulioNCavalcanti`.** Em 08/11/2026, os jobs dos PRs #2 não começaram: "The job was not started because your account is locked due to a billing issue". O bloqueio continuou depois de rodar de novo. A página de cobrança não mostra nada devido, e a conta nunca pagou pelo GitHub. O Actions funcionou no `lambda-auth` em 03/11/2026, então o bloqueio começou depois. Próximo passo: abrir chamado no suporte do GitHub (support.github.com) com a mensagem exata. Enquanto isso, nenhum workflow roda nos repositórios dessa conta, inclusive o `terraform` do `lambda-auth`. Em 14/11/2026, a conta `JulioNCavalcanti` apresentou o mesmo bloqueio: os workflows de `main` de `infra-k8s` e `infra-db`, disparados pelo merge, não começaram, com a mesma mensagem; o de `master` do `lambda-auth` também não. O bloqueio é do GitHub, não da AWS. **Decidido em 14/11/2026: o Actions não volta, e tudo passa a ser manual.** Ficam sem atender, a menos que o Actions volte: pipeline de CI/CD com deploy automatizado por serviço, checagens automáticas obrigatórias na `main` e, no vídeo, o "deploy automatizado de pelo menos um microsserviço com validação de testes" (`docs/requisitos-fase4.md`).
-9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o push na branch principal dispara `terraform apply`, mas com o Actions bloqueado nada roda. Se o Actions voltar, `infra-k8s` e `infra-db` esperam aprovação no environment `producao`; em `lambda-auth` não há revisor, e o deploy roda na hora com os secrets que estiverem lá.
+8. **GitHub Actions bloqueado nas contas `KauaAlmeidaSilveira` e `JulioNCavalcanti`.** Em 08/11/2026, os jobs dos PRs #2 não começaram: "The job was not started because your account is locked due to a billing issue". O bloqueio continuou depois de rodar de novo. A página de cobrança não mostra nada devido, e a conta nunca pagou pelo GitHub. O Actions funcionou no `lambda-auth` em 03/11/2026, então o bloqueio começou depois. Próximo passo: abrir chamado no suporte do GitHub (support.github.com) com a mensagem exata. Enquanto isso, nenhum workflow roda nos repositórios dessa conta, inclusive o `terraform` do `lambda-auth`. Em 14/11/2026, a conta `JulioNCavalcanti` apresentou o mesmo bloqueio: os workflows de `main` de `infra-k8s` e `infra-db`, disparados pelo merge, não começaram, com a mesma mensagem; o de `master` do `lambda-auth` também não. O bloqueio é do GitHub, não da AWS. **Decidido em 14/11/2026: o Actions não volta, e tudo passa a ser manual.** Ficam sem atender, a menos que o Actions volte: pipeline de CI/CD com deploy automatizado por serviço, checagens automáticas obrigatórias na `main` e, no vídeo, o "deploy automatizado de pelo menos um microsserviço com validação de testes" (`docs/requisitos-fase4.md`). **Em 17/11/2026 o Actions voltou nas duas contas** e os workflows rodam de novo. A Execução está verde. OS e Billing falham no `LogbackJsonConfigIT` no runner. O `lambda-auth` fez deploy verde com o usuário IAM. A decisão de 14/11/2026 continua valendo para o deploy dos serviços, que segue manual até entrar no `ci.yml`.
+9. **Merge que cria infraestrutura.** Em `lambda-auth`, `infra-k8s` e `infra-db`, o push na branch principal dispara `terraform apply`, e desde 17/11/2026 o Actions roda. Em `lambda-auth` não há revisor: o merge do #5 fez o `apply` na hora, com o usuário IAM `github-actions-lambda-auth`. Com o ambiente destruído, esse deploy falha, porque não encontra o NLB do OS. `infra-k8s` e `infra-db` esperam aprovação no environment `producao`, e os secrets da AWS deles ainda são os do Academy, expirados. Nunca rodar `workflow_dispatch` nesses workflows: ele dispara o `apply`.
 
 ---
 
