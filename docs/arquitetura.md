@@ -9,7 +9,6 @@ e o catálogo de comandos e eventos em [plano-secoes-0-4.md](plano-secoes-0-4.md
 ```mermaid
 flowchart TB
     usuario(["Funcionário / cliente"])
-    mp(["Mercado Pago<br/>API de Orders"])
 
     subgraph aws["AWS us-east-1"]
         direction TB
@@ -24,48 +23,46 @@ flowchart TB
             bil["Billing Service"]
         end
 
-        subgraph sqs["SQS, cada fila com DLQ"]
-            direction LR
-            qexe[["oficina-execucao-comandos"]]
-            qos[["oficina-os-saga-eventos"]]
-            qbil[["oficina-billing-comandos"]]
-        end
-
+        sqs[["SQS<br/>os-saga-eventos · execucao-comandos · billing-comandos<br/>cada fila com DLQ"]]
         rds[("RDS PostgreSQL<br/>oficina_os · oficina_execucao")]
         ddb[("DynamoDB<br/>oficina-billing")]
     end
 
+    mp(["Mercado Pago<br/>API de Orders"])
     gmail(["Gmail SMTP"])
     nr(["New Relic"])
 
     usuario -->|HTTPS| gw
-    mp -->|webhook assinado| gw
     gw -->|"/auth/*"| lambda
     lambda --> secrets
     lambda -->|"/internal/auth/*"| os
+    lambda ~~~ exe
+    lambda ~~~ bil
     gw -->|"/api/*"| exe
     gw -->|"/api/*"| os
     gw -->|"/api/*"| bil
 
-    os -->|"/internal/produtos"| exe
-    os -->|comandos| qexe
-    os -->|comandos| qbil
-    qexe --> exe
-    qbil --> bil
-    exe -->|eventos| qos
-    bil -->|eventos| qos
-    qos --> os
+    exe <-->|"comandos / eventos"| sqs
+    os <-->|"comandos / eventos"| sqs
+    bil <-->|"comandos / eventos"| sqs
 
-    os --> rds
     exe --> rds
+    os --> rds
     bil --> ddb
-    bil -->|"order: criar, consultar, reembolsar"| mp
-    bil -->|orçamento e QR| gmail
+    bil <-->|"order e webhook"| mp
+    bil -->|"orçamento e QR"| gmail
     eks -.->|"APM, logs, trace"| nr
 ```
 
-Setas cheias são chamadas e mensagens; a tracejada, telemetria do agente New Relic nos 3 serviços. Do Gateway
-aos serviços o caminho é VPC Link e um NLB interno por serviço; EKS, RDS e Lambda ficam em subnets privadas.
+Setas cheias são chamadas e mensagens; a tracejada, telemetria do agente New Relic nos 3 serviços.
+
+- **Entrada:** do Gateway aos serviços o caminho é VPC Link e um NLB interno por serviço. O webhook do Mercado
+  Pago também entra pelo Gateway (`POST /webhooks/mercado-pago`, rota pública) e chega ao Billing.
+- **Filas:** o OS envia comandos para `oficina-execucao-comandos` e `oficina-billing-comandos`; Execução e
+  Billing respondem com eventos em `oficina-os-saga-eventos`.
+- **REST síncrono**, só em três pontos: Lambda → OS (`/internal/auth/*`), OS → Execução (`/internal/produtos`)
+  e Billing → Mercado Pago.
+- **Rede:** EKS, RDS e Lambda ficam em subnets privadas.
 
 ## Componentes
 
