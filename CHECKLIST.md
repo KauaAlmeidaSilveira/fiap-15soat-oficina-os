@@ -25,7 +25,7 @@
 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
 | `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
 
-As branches de trabalho acima já foram mergeadas; em 16/11/2026 os 6 repositórios estão com `main`/`master` em dia. PRs abertos em rascunho, na branch `docs/documentacao`: [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15) (diagramas de sequência, ADRs, RFCs, `README-DOCS.md` e este checklist), [Billing #9](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/9) e [Execução #8](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/8) (cobertura no README).
+As branches de trabalho acima já foram mergeadas; em 16/11/2026 os 6 repositórios estão com `main` em dia (a `master` do `lambda-auth` foi renomeada para `main` no mesmo dia). PRs abertos em rascunho, na branch `docs/documentacao`: [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15) (diagramas de sequência, ADRs, RFCs, `README-DOCS.md` e este checklist), [Billing #9](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/9) e [Execução #8](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/8) (cobertura no README) e [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4) (README citando `main`).
 
 O workflow de CI (`ci.yml`) está em `main` nos 3 serviços desde 14/11/2026 ([OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2) mergeados pelo Kauã, [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2) pelo Júlio), sem nunca ter rodado: o GitHub Actions das duas contas está bloqueado por billing (ponto de atenção 8). **Decidido em 14/11/2026: o Actions não volta, e build, testes, `apply` e deploy passam a ser manuais, da máquina do Júlio.** O código dos 3 serviços, de `infra-k8s`, de `infra-db` e de `lambda-auth` está em `main`/`master`; não há PR aberto.
 
@@ -73,7 +73,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** testar o push direto na `main` dos 3 serviços (Seção 5), a gravação do vídeo numa nova subida e o PDF. A documentação da Seção 8 foi fechada em 16/11/2026.
+7. **Próximos passos:** a gravação do vídeo numa nova subida e o PDF. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
 
 ### Ambiente na AWS
 
@@ -121,27 +121,27 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 
 ### Decisões em aberto
 
-- **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
+- **D7, decidida em 16/11/2026 pelo Kauã:** sim, o EKS compartilhado conta como infraestrutura própria, com deploy e banco por serviço. A confirmação com o professor foi dispensada.
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud: teste do push direto na `main` dos 3 serviços, roteiro do vídeo e PDF.
+Dá para avançar sem cloud: roteiro do vídeo e PDF.
 
 ---
 
 ## Dimensão
 
-Contagem de 16/11/2026: **55 pendentes, 272 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **49 pendentes, 278 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
-| 0. Decisões em aberto | 1 | Pequeno, mas trava o resto |
+| 0. Decisões em aberto | 0 | Pequeno, mas trava o resto |
 | 1. Separação em Microsserviços | 0 | **Muito grande** |
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
-| 5. CI/CD Automatizado | 31 | Médio |
-| 6. Infraestrutura | 1 | Grande |
+| 5. CI/CD Automatizado | 27 | Médio |
+| 6. Infraestrutura | 0 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
 | 9. Entregáveis | 18 | Médio |
@@ -151,7 +151,7 @@ Contagem de 16/11/2026: **55 pendentes, 272 concluídos, 0 não verificáveis**.
 
 ## 0. Decisões em aberto
 
-Decisões tomadas pelo Kauã em 02/11/2026. Só a D7 segue em aberto.
+Decisões tomadas pelo Kauã em 02/11/2026; a D7, em 16/11/2026. Nenhuma segue em aberto.
 
 | # | Tipo | Decisão | Resposta | Decidido |
 |---|---|---|---|---|
@@ -161,7 +161,7 @@ Decisões tomadas pelo Kauã em 02/11/2026. Só a D7 segue em aberto.
 | D4 | Arquitetura | Onde ficam cliente, veículo, usuário, produto e estoque? | Cliente, veículo e usuário no OS Service; produto e estoque em Execução; 3 serviços no total | [x] |
 | D5 | Arquitetura | Tipo de Saga e broker | Orquestrada, com o orquestrador dentro do OS Service, e SQS (pendente validar na conta AWS) | [x] |
 | D6 | Arquitetura | Banco de cada serviço | DynamoDB no Billing, PostgreSQL nos outros dois (pendente validar na conta AWS; MongoDB é o plano B) | [x] |
-| D7 | Arquitetura | "Infraestrutura própria" aceita EKS compartilhado? | **Em aberto:** decidir com o Júlio e confirmar com o professor. Recomendação: um cluster só, com deploy e banco por serviço | [ ] |
+| D7 | Arquitetura | "Infraestrutura própria" aceita EKS compartilhado? | Sim: um cluster só, com deploy e banco por serviço (decidido em 16/11/2026; confirmação com o professor dispensada) | [x] |
 | D8 | Logística | Prazo de entrega | 17/11/2026 | [x] |
 | D9 | Negócio | O que acontece se o cliente não responder ao orçamento? | Quando o link vence, em 7 dias, a OS vai para `CANCELADA` | [x] |
 | D10 | Negócio | Em que momento o estoque é baixado? | Na aprovação, como hoje, com devolução justificada se o pagamento falhar | [x] |
@@ -363,16 +363,16 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 
 | Regra | OS | Billing | Execução | lambda-auth | infra-k8s | infra-db |
 |---|---|---|---|---|---|---|
-| Branch principal chamada `main` | [x] | [x] | [x] | [ ] | [x] | [x] |
+| Branch principal chamada `main` | [x] | [x] | [x] | [x] | [x] | [x] |
 | PR obrigatório | [x] | [x] | [x] | [x] | [x] | [x] |
 | Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [x] | [x] |
+| Push direto testado e bloqueado | [x] | [x] | [x] | [x] | [x] | [x] |
 
-Em 16/11/2026, o Kauã aplicou na `main` dos 3 serviços a mesma regra da infra: PR obrigatório com 0 aprovações, valendo para administradores (`enforce_admins`), sem force push nem exclusão e sem checagem obrigatória; o `gh api` devolve essa configuração. Falta testar o push direto (linha "Push direto testado e bloqueado"). Na `master` de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
+Em 16/11/2026, o Kauã aplicou na `main` dos 3 serviços a mesma regra da infra: PR obrigatório com 0 aprovações, valendo para administradores (`enforce_admins`), sem force push nem exclusão e sem checagem obrigatória; o `gh api` devolve essa configuração. No mesmo dia, um push direto na `main` dos 3 foi recusado (`GH006: Protected branch update failed for refs/heads/main.` / `Changes must be made through a pull request.`), e a `main` ficou intacta. Na branch principal de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
 
 Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`. Em 16/11/2026 a regra passou a valer também para administradores (`enforce_admins`), e o push direto do Júlio na `main` dos dois foi recusado (`GH006: Protected branch update failed`).
 
-Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`. A `master` do `lambda-auth` continua com esse nome (decidido pelo Kauã em 16/11/2026), então a linha "Branch principal chamada `main`" fica pendente nele. Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
+Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`. Em 16/11/2026, a `master` do `lambda-auth` foi renomeada para `main` pela API do GitHub: a proteção acompanhou a branch, a padrão passou a ser `main` e o `ci-cd.yml` já aceitava as duas. Clones antigos precisam de `git branch -m master main && git fetch origin && git branch -u origin/main main && git remote set-head origin -a`. O README foi ajustado no [lambda-auth #4](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/4). Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
 
 ## 6. Infraestrutura
 
@@ -382,7 +382,7 @@ Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admi
 - [x] Avaliar a capacidade do cluster para 3 serviços, `nri-bundle` e HPA (2 nós `t4g.medium`, máximo 3; requests de 250m e 384Mi por serviço) — validado na AWS em 15/11/2026: a conta tem cota de 1 vCPU (aumento negado), então roda com 1 node `r6g.medium` (1 vCPU, 8 GB), prefix delegation e requests de 50m; sem `nri-bundle`, que não cabe. Uso real em repouso ~6% de CPU e ~28% de memória; o HPA escalou Billing e Execução para 2 réplicas na subida
 - [x] Escrever broker e demais recursos no repositório escolhido (D5) — `sqs.tf`, em `main` desde 14/11/2026
 - [x] Aplicar broker e demais recursos na conta AWS (D5) — validado na AWS em 15/11/2026
-- [ ] Confirmar o modelo de cluster com o professor (D7)
+- [x] Confirmar o modelo de cluster com o professor (D7) — dispensado pelo Kauã em 16/11/2026, junto com a decisão da D7
 
 ### `infra-db`
 
