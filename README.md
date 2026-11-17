@@ -106,6 +106,7 @@ afirma que um evento não foi publicado, e a lista vazia é o caso esperado).
 
 ## Documentos
 
+- [Arquitetura: diagrama geral, divisão dos serviços e tecnologias](docs/arquitetura.md)
 - [Checklist de entrega](CHECKLIST.md)
 - [Plano das Seções 0 a 4](docs/plano-secoes-0-4.md)
 - [Requisitos da Fase 4](docs/requisitos-fase4.md)

@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 16/11/2026: **79 pendentes, 248 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **77 pendentes, 250 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -141,7 +141,7 @@ Contagem de 16/11/2026: **79 pendentes, 248 concluídos, 0 não verificáveis**.
 | 5. CI/CD Automatizado | 34 | Médio |
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
-| 8. Documentação da Arquitetura | 10 | Médio |
+| 8. Documentação da Arquitetura | 8 | Médio |
 | 9. Entregáveis | 29 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
@@ -443,13 +443,13 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 
 ## 8. Documentação da Arquitetura
 
-- [ ] **Diagrama geral da arquitetura final** com microsserviços, bancos e comunicação (exigido no PDF)
+- [x] **Diagrama geral da arquitetura final** com microsserviços, bancos e comunicação (exigido no PDF) — `docs/arquitetura.md`, em Mermaid, em 16/11/2026; levar ao PDF na Seção 9
 - [ ] Diagrama de sequência da Saga: fluxo feliz
 - [ ] Diagrama de sequência da Saga: fluxo com compensação
 - [ ] Diagrama de sequência do pagamento com Mercado Pago
 - [ ] Diagrama ER ou modelo de dados de cada serviço, gerado por Mermaid
 - [x] **Descrição da estratégia de Saga** (exigido no PDF) — no README do OS; levar ao PDF na Seção 9
-- [ ] **Justificativa da divisão dos microsserviços e das tecnologias** (exigido no PDF) — o README do OS justifica comunicação e bancos; falta a divisão dos serviços
+- [x] **Justificativa da divisão dos microsserviços e das tecnologias** (exigido no PDF) — `docs/arquitetura.md`, em 16/11/2026: dono de cada dado, alternativas descartadas e uma tabela de tecnologias com o porquê; levar ao PDF na Seção 9
 - [ ] ADR da Saga
 - [ ] ADR de mensageria, substituindo a ADR-0002 (comunicação síncrona via REST)
 - [ ] ADR ou RFC do banco NoSQL
