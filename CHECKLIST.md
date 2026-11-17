@@ -1,10 +1,10 @@
 # Checklist de Entrega — Tech Challenge Fase 4
 
-> Estado conferido em 08/11/2026 contra o código, as branches, os PRs e as regras de proteção de cada repositório.
+> Estado conferido em 16/11/2026 contra o código, as branches, os PRs, as execuções do Actions, os colaboradores e as regras de proteção de cada repositório.
 > Legenda: `[ ]` pendente · `[x]` concluído · `[?]` não verificável localmente (falta ferramenta/credencial, não falta de trabalho). Sem status "parcial": um item composto por várias partes vira uma linha por parte, cada uma binária. Por isso, o que está pronto no local e falta validar no ambiente real aparece em duas linhas.
 > `(Dn)` indica que o item depende da decisão `n` da Seção 0.
 
-**Entrega: 17/11/2026.** Seções 0 a 4 e higiene ficam com o Kauã; Seções 5 a 9 serão tratadas depois, junto com o Júlio.
+**Entrega: 17/11/2026.** Seções 0 a 4 e higiene foram feitas pelo Kauã até 08/11/2026; Seções 5 a 9 foram tocadas pelo Júlio entre 14 e 16/11/2026.
 
 **Resumo:** a Fase 4 é majoritariamente reconstrução. Reaproveitamos a base de domínio, EKS, API Gateway, Lambda e New Relic. Não existem hoje: divisão em serviços, banco por serviço, NoSQL, mensageria, Saga, pagamento, BDD e Sonar no CI.
 
@@ -21,9 +21,11 @@
 | `fiap-15soat-oficina-execucao` | `feat/fila-estoque-saga` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/1) mergeado em 08/11/2026, com a transação das rotas de operador | 81 testes, 96,2% de cobertura |
 | `fiap-15soat-oficina-billing` | `feat/orcamento-pagamento` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/1) mergeado em 08/11/2026 | 82 testes, 95,4% de cobertura |
 | `fiap-15soat-oficina-os` | `feat/divisao-servicos` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/1) mergeado em 08/11/2026, com os cenários F3, F8 e F9 | 215 testes, 96,7% de cobertura, mais 12 cenários BDD |
-| `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) mergeado em 14/11/2026, sem deploy | 45 testes; `terraform validate` ok |
-| `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) mergeado em 14/11/2026, sem `apply` | `terraform validate` ok |
-| `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) mergeado em 14/11/2026, sem `apply` | `terraform validate` ok |
+| `fiap-15soat-oficina-lambda-auth` | `feat/sem-acesso-ao-banco` | [PR #1](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-lambda-auth/pull/1) mergeado em 14/11/2026; #2 e #3 em 15/11/2026; aplicado e destruído em 15/11/2026 | 45 testes; `terraform validate` ok |
+| `fiap-15soat-oficina-infra-k8s` (do Júlio) | `feat/filas-saga` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-k8s/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
+| `fiap-15soat-oficina-infra-db` (do Júlio) | `feat/tabela-billing` | [PR #1](https://github.com/JulioNCavalcanti/fiap-15soat-oficina-infra-db/pull/1) mergeado em 14/11/2026; #2 em 15/11/2026; aplicado e destruído em 15/11/2026 | `terraform validate` ok |
+
+As branches de trabalho acima já foram mergeadas; em 16/11/2026 os 6 repositórios estão com `main`/`master` em dia e nenhum PR aberto.
 
 O workflow de CI (`ci.yml`) está em `main` nos 3 serviços desde 14/11/2026 ([OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/2) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/pull/2) mergeados pelo Kauã, [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/pull/2) pelo Júlio), sem nunca ter rodado: o GitHub Actions das duas contas está bloqueado por billing (ponto de atenção 8). **Decidido em 14/11/2026: o Actions não volta, e build, testes, `apply` e deploy passam a ser manuais, da máquina do Júlio.** O código dos 3 serviços, de `infra-k8s`, de `infra-db` e de `lambda-auth` está em `main`/`master`; não há PR aberto.
 
@@ -61,7 +63,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 - Segunda subida com 1 node `r6g.medium` (1 vCPU): tudo no ar depois de três ajustes (SMTP fora do health check do Billing, requests de CPU de 50m, JDK 21 no `mvn`). Newman: Login 3/3; Catálogo 26/49, com as falhas em cascata do token único (Seção 4). Fluxo completo feito à mão pelo Gateway até `ENTREGUE`.
 - Mercado Pago: webhook cadastrado no Modo de teste do painel; a primeira notificação assinada deu 401 e levou à correção da assinatura.
 - Ambiente destruído no fim do dia por `destruir-aws.sh` (109 recursos; conferido que não sobrou VPC, instância, NLB, NAT, EKS, RDS, ECR, fila, Lambda nem Gateway).
-- PRs mergeados pelo Júlio no mesmo dia, sem CI (Actions bloqueado): `infra-k8s` #2, `infra-db` #2, `lambda-auth` #2 e #3, Execução #3 e #4, Billing #3 e #4 e OS (`feat/deploy-aws`).
+- PRs mergeados pelo Júlio no mesmo dia, sem CI (Actions bloqueado): `infra-k8s` #2, `infra-db` #2, `lambda-auth` #2 e #3, Execução #3 e #4, Billing #3 e #4 e OS (`feat/deploy-aws`). Depois, também sem CI: Billing #5 a #7 e Execução #5 e #6 (trace pelo SQS, webhook de order inexistente, probes) em 15/11/2026, e OS #10 a #13 (probes, proteção de branch da infra, diagrama e justificativa da arquitetura) até 16/11/2026, e o modelo de dados nos READMEs (OS #14, Billing #8, Execução #7) em 16/11/2026. As execuções disparadas por esses merges seguem recusadas com "The job was not started because your account is locked due to a billing issue" (última conferida: OS, 17/11/2026 01:28 UTC).
 
 ### Por onde retomar
 
@@ -121,15 +123,15 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 
 - **D7:** o EKS compartilhado é aceito como infraestrutura própria? Decidir com o Júlio e confirmar com o professor.
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
-- **Seções 5 a 9:** ficam para depois, com o Júlio. Não comecei nenhuma delas de propósito; o que aparece marcado ali saiu como parte das Seções 0 a 4.
+- **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas em Mermaid, ADRs, README e métricas.
+Dá para avançar sem cloud: diagramas de sequência em Mermaid, ADRs, `README-DOCS.md`, cobertura nos READMEs de Billing e Execução, proteção de branch nos repositórios do Kauã, roteiro do vídeo e PDF.
 
 ---
 
 ## Dimensão
 
-Contagem de 16/11/2026: **70 pendentes, 257 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **68 pendentes, 259 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -142,7 +144,7 @@ Contagem de 16/11/2026: **70 pendentes, 257 concluídos, 0 não verificáveis**.
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 7 | Médio |
-| 9. Entregáveis | 23 | Médio |
+| 9. Entregáveis | 21 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -196,9 +198,9 @@ Mantém o prefixo `fiap-15soat-oficina-`. O monólito `fiap-15soat-oficina-api` 
 | 1 | `fiap-15soat-oficina-os` | Abertura, status, histórico, orquestração da Saga, cliente, veículo e usuário | criado; PR #1 mergeado |
 | 2 | `fiap-15soat-oficina-billing` | Orçamento, aprovação, pagamento, Mercado Pago | criado; PR #1 mergeado |
 | 3 | `fiap-15soat-oficina-execucao` | Fila, diagnóstico, reparo, produto e estoque | criado; PR #1 mergeado |
-| 4 | `fiap-15soat-oficina-lambda-auth` | Autenticação e API Gateway | Sem acesso ao banco, em `master` desde 14/11/2026 (PR #1); rotas do Gateway pendentes (Seção 6) |
-| 5 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | VPC, EKS, ECR | Filas em `main` desde 14/11/2026 (PR #1), sem `apply`; ECR e cluster pendentes (Seção 6) |
-| 6 | `fiap-15soat-oficina-infra-db` (do Júlio) | Bancos gerenciados | DynamoDB em `main` desde 14/11/2026 (PR #1), sem `apply`; bancos SQL pendentes (Seção 6) |
+| 4 | `fiap-15soat-oficina-lambda-auth` | Autenticação e API Gateway | Sem acesso ao banco (PR #1, 14/11/2026); rotas por serviço e role própria (PR #2, 15/11/2026) |
+| 5 | `fiap-15soat-oficina-infra-k8s` (do Júlio) | VPC, EKS, ECR | Filas (PR #1); roles, Pod Identity e ECR por serviço (PR #2, 15/11/2026) |
+| 6 | `fiap-15soat-oficina-infra-db` (do Júlio) | Bancos gerenciados | DynamoDB (PR #1); database e usuário por serviço na RDS (PR #2, 15/11/2026) |
 
 - [x] Criar repositório `fiap-15soat-oficina-os`
 - [x] Criar repositório `fiap-15soat-oficina-billing`
@@ -366,7 +368,7 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 | Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [x] | [x] |
 
-Em 08/11/2026, o `gh api` confirmou de novo que a `main` dos 3 serviços está sem proteção (`Branch not protected`). Na `master` de `lambda-auth`, o PR é obrigatório, mas não há checagem obrigatória (`required_status_checks` vazio).
+Em 16/11/2026, pela conta do Kauã, o `gh api` confirmou que a `main` dos 3 serviços segue sem proteção (`Branch not protected`) e sem ruleset. Na `master` de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
 
 Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`. Em 16/11/2026 a regra passou a valer também para administradores (`enforce_admins`), e o push direto do Júlio na `main` dos dois foi recusado (`GH006: Protected branch update failed`).
 
@@ -465,7 +467,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | `Dockerfile` | [x] | [x] | [x] |
 | Manifestos Kubernetes | [x] | [x] | [x] |
 | Pipeline de CI/CD | [ ] | [ ] | [ ] |
-| Evidência de cobertura no README (print ou link) | [ ] | [ ] | [ ] |
+| Evidência de cobertura no README (print ou link) | [x] | [ ] | [ ] |
 | Documentação da arquitetura do serviço | [x] | [x] | [x] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
 | Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
@@ -473,12 +475,14 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [x] | [x] | [x] |
 
+Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: só o README do OS tem, na tabela do SonarQube local de 15/11/2026 da seção "Qualidade" (com os números dos 3 serviços); os de Billing e Execução não citam cobertura.
+
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
 - [x] READMEs de `infra-k8s` e `infra-db` atualizados — e o de `lambda-auth`, para a Fase 4
 - [ ] Criar `README-DOCS.md`, índice para o avaliador, como na Fase 3
 - [x] Corrigir a descrição do Swagger nos 3 serviços (`SwaggerConfig`) — em 15/11/2026: título e papel de cada serviço, autenticação por Bearer JWT com botão Authorize, versão 4.0.0 (branches `fix/descricao-swagger`)
-- [ ] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar)
+- [x] Usuário `soat-architecture` em todos os repositórios (não está no PDF da Fase 4, mas foi exigido nas fases anteriores; confirmar) — conferido em 16/11/2026: colaborador com `write` nos 6 repositórios, sem convite pendente
 
 ### Vídeo de demonstração (YouTube/Vimeo, público ou não listado, até 15 minutos)
 
