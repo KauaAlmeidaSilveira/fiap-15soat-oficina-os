@@ -131,7 +131,7 @@ Dá para avançar sem cloud: merge dos PRs de documentação e roteiro do vídeo
 
 ## Dimensão
 
-Contagem de 16/11/2026: **44 pendentes, 283 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **43 pendentes, 284 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -142,7 +142,7 @@ Contagem de 16/11/2026: **44 pendentes, 283 concluídos, 0 não verificáveis**.
 | 4. Testes e Qualidade | 0 | Grande |
 | 5. CI/CD Automatizado | 27 | Médio |
 | 6. Infraestrutura | 0 | Grande |
-| 7. Monitoramento e Observabilidade | 4 | Médio |
+| 7. Monitoramento e Observabilidade | 3 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
 | 9. Entregáveis | 13 | Médio |
 | Higiene do repositório | 0 | Pequeno |
@@ -435,13 +435,13 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 - [x] Propagar `X-Correlation-Id` na chamada REST OS → Execução
 - [x] Propagar `X-Correlation-Id` na chamada REST Lambda → OS — em 15/11/2026, por `AsyncLocalStorage` (`src/correlacao.js`); a Lambda gera o id quando não vem e o devolve na resposta (branch `fix/repassar-correlation-id`)
 - [x] Propagar correlação e ID da Saga nas mensagens — `Envelope` e `MDC` nos listeners
-- [ ] Trace distribuído visível de ponta a ponta, atravessando o broker — escrito em 15/11/2026 (`RastreioDistribuido`: cabeçalhos do trace no campo `rastreio` do envelope, aceitos no listener com `@Trace(dispatcher = true)`), falta ver no New Relic com o ambiente no ar
+- [x] Trace distribuído visível de ponta a ponta, atravessando o broker — escrito em 15/11/2026 (`RastreioDistribuido`: cabeçalhos do trace no campo `rastreio` do envelope, aceitos no listener com `@Trace(dispatcher = true)`). Visto no New Relic em 17/11/2026, com o ambiente no ar: trace `65781cc5c0d74c5c3905e417064fb9ba` (66 spans, 5 entidades) sai de `diagnostico/concluir` na Execução e passa por `DiagnosticoConcluido` (OS), `GerarOrcamento` (Billing) e `OrcamentoGerado` (OS), atravessando o SQS três vezes. Print em `docs/evidencias/new-relic/05-trace-distribuido-sqs.jpg`
 - [x] Adaptar os dashboards de `observability/`, hoje amarrados ao `oficina-api` — `observability/` no OS, dashboard "Oficina Fase 4 - Microsserviços e Saga" (Serviços, Saga, Pagamentos, Rastreamento), aplicado em 15/11/2026 na conta 7428180 (`terraform apply` local; as 26 consultas NRQL conferidas pela API)
 - [x] Criar painel de Saga (em andamento, concluídas, compensadas) — eventos customizados `OficinaSagaTransicao` e `OficinaMensagemPublicada`, que não dependem do `nri-bundle`
 - [x] Criar painel de pagamentos — a partir dos eventos publicados pelo Billing (`OficinaMensagemPublicada`) e de `OficinaIntegracaoFalha`
 - [ ] Criar alerta para falha de Saga e fila parada ou com DLQ — Saga (`COMPENSACAO_FALHOU`), falha de cobrança ou estorno, integração, erro, latência e serviço sem dados aplicados em 15/11/2026 (`observability/alertas.tf`, e-mail); a DLQ fica de fora (métrica do CloudWatch, exige integrar a conta AWS ao New Relic)
 - [x] Definir o novo repositório de `observability/`, que hoje mora na `api` — no OS, junto do compose e do Postman
-- [ ] Validar tudo com a infraestrutura no ar, como na Fase 3
+- [ ] Validar tudo com a infraestrutura no ar, como na Fase 3 — em 17/11/2026, com o ambiente no ar, conferidos APM dos 3 serviços, as 4 abas do dashboard com dados, logs com o mesmo `correlationId` nos 3 serviços, o trace pelo SQS e as condições de alerta (prints em `docs/evidencias/new-relic/`). Falta ver com dados o painel de Pagamentos e as Sagas encerradas: nessa subida nenhum orçamento tinha sido aprovado (6 OS, Sagas até `AGUARDANDO_DECISAO`)
 
 ## 8. Documentação da Arquitetura
 
