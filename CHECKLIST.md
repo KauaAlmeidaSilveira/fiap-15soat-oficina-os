@@ -129,7 +129,7 @@ Dá para avançar sem cloud, se for liberado: manifestos Kubernetes, diagramas e
 
 ## Dimensão
 
-Contagem de 16/11/2026: **77 pendentes, 250 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **70 pendentes, 257 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -141,8 +141,8 @@ Contagem de 16/11/2026: **77 pendentes, 250 concluídos, 0 não verificáveis**.
 | 5. CI/CD Automatizado | 34 | Médio |
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
-| 8. Documentação da Arquitetura | 8 | Médio |
-| 9. Entregáveis | 29 | Médio |
+| 8. Documentação da Arquitetura | 7 | Médio |
+| 9. Entregáveis | 23 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
@@ -447,7 +447,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 - [ ] Diagrama de sequência da Saga: fluxo feliz
 - [ ] Diagrama de sequência da Saga: fluxo com compensação
 - [ ] Diagrama de sequência do pagamento com Mercado Pago
-- [ ] Diagrama ER ou modelo de dados de cada serviço, gerado por Mermaid
+- [x] Diagrama ER ou modelo de dados de cada serviço, gerado por Mermaid — em 16/11/2026, seção "Modelo de dados" no README de cada serviço: ER do PostgreSQL no OS e na Execução, e tabela única do DynamoDB (itens, chaves e GSI) no Billing
 - [x] **Descrição da estratégia de Saga** (exigido no PDF) — no README do OS; levar ao PDF na Seção 9
 - [x] **Justificativa da divisão dos microsserviços e das tecnologias** (exigido no PDF) — `docs/arquitetura.md`, em 16/11/2026: dono de cada dado, alternativas descartadas e uma tabela de tecnologias com o porquê; levar ao PDF na Seção 9
 - [ ] ADR da Saga
@@ -466,12 +466,12 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | Manifestos Kubernetes | [x] | [x] | [x] |
 | Pipeline de CI/CD | [ ] | [ ] | [ ] |
 | Evidência de cobertura no README (print ou link) | [ ] | [ ] | [ ] |
-| Documentação da arquitetura do serviço | [ ] | [ ] | [ ] |
+| Documentação da arquitetura do serviço | [x] | [x] | [x] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
 | Swagger abrindo com o serviço no ar | [x] | [x] | [x] |
 | Collection Postman atualizada, em `postman/` do repositório do OS | [x] | [x] | [x] |
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
-| Diagrama no README | [ ] | [ ] | [ ] |
+| Diagrama no README | [x] | [x] | [x] |
 
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
