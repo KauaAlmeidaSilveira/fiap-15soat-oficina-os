@@ -13,7 +13,7 @@ flowchart TB
     subgraph aws["AWS us-east-1"]
         direction TB
         gw["API Gateway HTTP<br/>autorizador JWT"]
-        lambda["Lambda lambda-auth<br/>Node 22"]
+        lambda["Lambda<br/>autenticação"]
         secrets[("Secrets Manager")]
 
         subgraph eks["EKS, namespace oficina"]
@@ -23,7 +23,7 @@ flowchart TB
             bil["Billing Service"]
         end
 
-        sqs[["SQS<br/>os-saga-eventos · execucao-comandos · billing-comandos<br/>cada fila com DLQ"]]
+        sqs[["SQS<br/>3 filas, cada uma com DLQ"]]
         rds[("RDS PostgreSQL<br/>oficina_os · oficina_execucao")]
         ddb[("DynamoDB<br/>oficina-billing")]
     end
