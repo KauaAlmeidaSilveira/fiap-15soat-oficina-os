@@ -53,6 +53,133 @@ REST só quando quem chama precisa da resposta para responder ao próprio chamad
 
 PostgreSQL em OS e Execução: as relações entre OS, itens, clientes e veículos, e o saldo de estoque travado em transação, pedem SQL. DynamoDB no Billing: orçamento e cobrança são documentos lidos por OS, sem junções, e a escrita condicional dá a idempotência da decisão e do pagamento.
 
+## Modelo de dados
+
+PostgreSQL (`oficina_os`), tabelas criadas pelo Hibernate a partir das entidades JPA. Linhas cheias são chaves
+estrangeiras; as tracejadas, referências por id sem FK.
+
+```mermaid
+erDiagram
+    CLIENTE ||--o{ CLIENTE_VEICULO : possui
+    VEICULO ||--o{ CLIENTE_VEICULO : pertence
+    CLIENTE ||--o{ ORDEM_SERVICO : abre
+    VEICULO ||--o{ ORDEM_SERVICO : atende
+    USERS |o--o{ ORDEM_SERVICO : registra
+    USERS }o--o{ ROLES : "users_roles"
+    ORDEM_SERVICO ||--o{ OS_ITEM : contem
+    ORDEM_SERVICO ||..o{ OS_HISTORICO_STATUS : "os_id"
+    ORDEM_SERVICO ||..o| SAGA : "os_id"
+
+    CLIENTE {
+        bigint id PK
+        varchar nome
+        varchar cpf_cnpj UK
+        varchar tipo_documento "CPF ou CNPJ"
+        varchar email
+        varchar telefone
+        varchar endereco
+        varchar status "ATIVO ou INATIVO"
+        varchar senha_hash "login do cliente"
+        timestamp criado_em
+        timestamp atualizado_em
+    }
+    VEICULO {
+        bigint id PK
+        varchar placa UK
+        varchar marca
+        varchar modelo
+        int ano
+        varchar cor
+        varchar chassi
+        timestamp criado_em
+        timestamp atualizado_em
+    }
+    CLIENTE_VEICULO {
+        bigint id PK
+        bigint cliente_id FK
+        bigint veiculo_id FK
+        timestamp vinculado_em
+    }
+    USERS {
+        uuid id PK
+        varchar username UK
+        varchar password "BCrypt"
+    }
+    ROLES {
+        bigint role_id PK
+        varchar name "ADMIN, RECEPCAO, OPERADOR"
+    }
+    ORDEM_SERVICO {
+        bigint id PK
+        varchar numero UK
+        bigint cliente_id FK
+        bigint veiculo_id FK
+        uuid user_id FK
+        varchar status
+        varchar descricao_problema
+        varchar observacoes
+        decimal valor_total
+        boolean itens_congelados "D15"
+        timestamp data_aprovacao
+        timestamp data_pagamento
+        timestamp data_inicio
+        timestamp data_fim
+        timestamp data_entrega
+        timestamp status_alterado_em
+        timestamp criado_em
+        timestamp atualizado_em
+    }
+    OS_ITEM {
+        bigint id PK
+        bigint ordem_servico_id FK
+        bigint produto_id "id no serviço de Execução"
+        varchar produto_nome "cópia"
+        varchar produto_tipo "PECA ou SERVICO, cópia"
+        int quantidade
+        decimal preco_unitario "cópia"
+        varchar observacao
+        timestamp criado_em
+    }
+    OS_HISTORICO_STATUS {
+        bigint id PK
+        bigint os_id
+        varchar status_de
+        varchar status_para
+        varchar motivo
+        timestamp ocorrido_em
+    }
+    SAGA {
+        uuid id PK
+        bigint os_id UK
+        varchar estado
+        timestamp prazo_em "orçamento ou QR"
+        varchar motivo
+        varchar correlation_id
+        uuid orcamento_id "id no Billing"
+        decimal valor
+        bigint versao "lock otimista"
+    }
+    OUTBOX {
+        uuid id PK
+        varchar fila
+        varchar tipo
+        text corpo "envelope JSON"
+        timestamp criado_em
+        timestamp publicado_em "nulo = pendente"
+    }
+    MENSAGEM_PROCESSADA {
+        uuid message_id PK
+        timestamp processada_em
+    }
+```
+
+- **Cópia do produto em `os_item`:** nome, tipo e preço são copiados da Execução (`GET /internal/produtos/{id}`) ao
+  adicionar o item; não há FK para outro banco.
+- **`saga`:** uma por OS, com o estado do orquestrador e o prazo vigiado pelo agendador. `versao` evita que duas
+  réplicas avancem a mesma Saga.
+- **`outbox` e `mensagem_processada`:** publicação na mesma transação da mudança de estado e consumo idempotente por
+  `messageId`.
+
 ## Rodar
 
 Requer Java 21, Maven 3.9+, Docker e os repositórios de Execução e Billing na pasta vizinha.
