@@ -7756,6 +7756,472 @@
         }
       ],
       "description": "Não funcionam localmente: o login é a Lambda, que o Docker Compose não sobe. Exigem url_auth preenchida e ainda não foram testadas na AWS.\n\nNa AWS cada usuário tem uma role só: `token` é o do ADMIN (`kaua@gmail.com`) e `token_operador` o do OPERADOR, exigido para criar, alterar e inativar produto. Rode esta pasta antes das outras e exporte o environment (`--export-environment`)."
+    },
+    {
+      "name": "Só na AWS: Fluxo completo da OS",
+      "item": [
+        {
+          "name": "1. Operador cria a peça (saldo 10)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_execucao}}/api/produtos",
+              "host": [
+                "{{url_execucao}}"
+              ],
+              "path": [
+                "api",
+                "produtos"
+              ]
+            },
+            "description": "Peça própria do cenário, para o saldo não depender de execuções anteriores. Usa o `token_operador`: criar produto é só de OPERADOR.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Peça de teste {{$randomInt}}{{$randomInt}}\",\n  \"descricao\": \"Criada pela collection\",\n  \"tipo\": \"PECA\",\n  \"precoUnitario\": 50.0,\n  \"unidadeMedida\": \"UN\",\n  \"quantidadeInicial\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_operador}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('peca_id', String(pm.response.json().id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Recepção abre a OS",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico"
+              ]
+            },
+            "description": "Abre a OS com 2 unidades da peça. A Saga começa em AGUARDANDO_DIAGNOSTICO.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{cliente_id}},\n  \"veiculoId\": {{veiculo_id}},\n  \"descricaoProblema\": \"Barulho ao frear\",\n  \"observacoes\": null,\n  \"itens\": [\n    {\n      \"produtoId\": {{peca_id}},\n      \"quantidade\": 2,\n      \"precoUnitario\": null,\n      \"observacao\": \"Peça do cenário\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const os = pm.response.json();",
+                  "pm.environment.set('os_id', String(os.id));",
+                  "pm.environment.set('os_numero', os.numero);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver a Saga (esperar AGUARDANDO_DIAGNOSTICO)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/saga",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "saga"
+              ]
+            },
+            "description": "Confere o andamento. A Saga é assíncrona: se `estado` ainda não for `AGUARDANDO_DIAGNOSTICO`, espere alguns segundos e envie de novo."
+          }
+        },
+        {
+          "name": "3. Mecânico inicia o diagnóstico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_execucao}}/api/execucoes/{{os_id}}/diagnostico/iniciar",
+              "host": [
+                "{{url_execucao}}"
+              ],
+              "path": [
+                "api",
+                "execucoes",
+                "{{os_id}}",
+                "diagnostico",
+                "iniciar"
+              ]
+            },
+            "description": "A OS entra na fila de diagnóstico logo depois de aberta."
+          }
+        },
+        {
+          "name": "4. Mecânico conclui o diagnóstico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_execucao}}/api/execucoes/{{os_id}}/diagnostico/concluir",
+              "host": [
+                "{{url_execucao}}"
+              ],
+              "path": [
+                "api",
+                "execucoes",
+                "{{os_id}}",
+                "diagnostico",
+                "concluir"
+              ]
+            },
+            "description": "Congela os itens e dispara a geração do orçamento no Billing, que envia o e-mail ao cliente."
+          }
+        },
+        {
+          "name": "Ver a Saga (esperar AGUARDANDO_DECISAO)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/saga",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "saga"
+              ]
+            },
+            "description": "Confere o andamento. A Saga é assíncrona: se `estado` ainda não for `AGUARDANDO_DECISAO`, espere alguns segundos e envie de novo."
+          }
+        },
+        {
+          "name": "Ver o orçamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_billing}}/api/orcamentos/{{os_id}}",
+              "host": [
+                "{{url_billing}}"
+              ],
+              "path": [
+                "api",
+                "orcamentos",
+                "{{os_id}}"
+              ]
+            },
+            "description": "Orçamento gerado pelo Billing, com `status` ENVIADO."
+          }
+        },
+        {
+          "name": "5. Oficina aprova o orçamento",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/aprovar",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "aprovar"
+              ]
+            },
+            "description": "Aprova em nome do cliente (responde 202). Alternativa: o cliente clica em \"Aprovar orçamento\" no e-mail. Depois disso a Saga baixa o estoque e o Billing cria a order no Mercado Pago e envia o QR por e-mail.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprovado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ver a Saga (esperar AGUARDANDO_PAGAMENTO)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/saga",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "saga"
+              ]
+            },
+            "description": "Confere o andamento. A Saga é assíncrona: se `estado` ainda não for `AGUARDANDO_PAGAMENTO`, espere alguns segundos e envie de novo."
+          }
+        },
+        {
+          "name": "6. Ver a cobrança",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_billing}}/api/pagamentos/{{os_id}}",
+              "host": [
+                "{{url_billing}}"
+              ],
+              "path": [
+                "api",
+                "pagamentos",
+                "{{os_id}}"
+              ]
+            },
+            "description": "Cobrança com `status` CRIADA e o `mpOrderId`. Agora pague o QR do e-mail com a conta compradora de teste, no app do Mercado Pago. O Mercado Pago chama o webhook sozinho; não há requisição para isso."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cobranca = pm.response.json();",
+                  "if (cobranca.mpOrderId) pm.environment.set('mp_order_id', cobranca.mpOrderId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver a cobrança (esperar PAGA)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_billing}}/api/pagamentos/{{os_id}}",
+              "host": [
+                "{{url_billing}}"
+              ],
+              "path": [
+                "api",
+                "pagamentos",
+                "{{os_id}}"
+              ]
+            },
+            "description": "Depois de pagar o QR, envie até `status` ser PAGA."
+          }
+        },
+        {
+          "name": "Só se o webhook não chegar: avisar o Billing",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_billing}}/webhooks/mercado-pago?type=order&data.id={{mp_order_id}}",
+              "host": [
+                "{{url_billing}}"
+              ],
+              "path": [
+                "webhooks",
+                "mercado-pago"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "order"
+                },
+                {
+                  "key": "data.id",
+                  "value": "{{mp_order_id}}"
+                }
+              ]
+            },
+            "description": "Use só se a cobrança continuar CRIADA depois de pagar (por exemplo, URL do webhook desatualizada no painel do Mercado Pago). O Billing não confia nesta chamada: consulta a order no Mercado Pago e só confirma se ela estiver paga.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Ver a Saga (esperar EM_REPARO)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/saga",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "saga"
+              ]
+            },
+            "description": "Confere o andamento. A Saga é assíncrona: se `estado` ainda não for `EM_REPARO`, espere alguns segundos e envie de novo."
+          }
+        },
+        {
+          "name": "7. Mecânico inicia o reparo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_execucao}}/api/execucoes/{{os_id}}/reparo/iniciar",
+              "host": [
+                "{{url_execucao}}"
+              ],
+              "path": [
+                "api",
+                "execucoes",
+                "{{os_id}}",
+                "reparo",
+                "iniciar"
+              ]
+            },
+            "description": "Só funciona com a Saga em EM_REPARO (OS na fila de reparo)."
+          }
+        },
+        {
+          "name": "8. Mecânico finaliza o reparo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url_execucao}}/api/execucoes/{{os_id}}/reparo/finalizar",
+              "host": [
+                "{{url_execucao}}"
+              ],
+              "path": [
+                "api",
+                "execucoes",
+                "{{os_id}}",
+                "reparo",
+                "finalizar"
+              ]
+            },
+            "description": "Encerra o reparo; a Saga vai para CONCLUIDA e a OS para FINALIZADA."
+          }
+        },
+        {
+          "name": "Ver a Saga (esperar CONCLUIDA)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/saga",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "saga"
+              ]
+            },
+            "description": "Confere o andamento. A Saga é assíncrona: se `estado` ainda não for `CONCLUIDA`, espere alguns segundos e envie de novo."
+          }
+        },
+        {
+          "name": "9. Oficina entrega o veículo",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/avancar-status",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "avancar-status"
+              ]
+            },
+            "description": "Leva a OS de FINALIZADA a ENTREGUE (D21)."
+          }
+        },
+        {
+          "name": "Ver a OS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}"
+              ]
+            },
+            "description": "Status final ENTREGUE."
+          }
+        },
+        {
+          "name": "Ver o histórico da OS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url_os}}/api/ordens-servico/{{os_id}}/historico",
+              "host": [
+                "{{url_os}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{os_id}}",
+                "historico"
+              ]
+            },
+            "description": "As mudanças de status da OS, da abertura à entrega."
+          }
+        }
+      ],
+      "description": "Fluxo completo de uma OS na AWS, uma requisição por passo, sem testes nem esperas automáticas: envie na ordem e use as requisições \"Ver a Saga\" para acompanhar.\n\nAntes: rode a pasta **Só na AWS: Login** (grava `token` do ADMIN e `token_operador`). `cliente_id` e `veiculo_id` vêm do environment (1 e 1).\n\nFora do Postman: o pagamento do QR, pela conta compradora de teste no app do Mercado Pago. Os scripts que restam só guardam `peca_id`, `os_id`, `os_numero` e `mp_order_id` no environment."
     }
   ]
 }
