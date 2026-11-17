@@ -73,7 +73,7 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 4. **CI manual:** o Actions não volta (decidido em 14/11/2026). Build, testes e cobertura rodam com `mvn verify` local, e o deploy, da máquina do Júlio. Os requisitos de pipeline e de "deploy automatizado" no vídeo ficam sem atender (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
 6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Na próxima subida, mostrar as compensações pela AWS e conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** proteção de branch nos repositórios do Kauã (Seção 5), a gravação do vídeo numa nova subida e o PDF. A documentação da Seção 8 foi fechada em 16/11/2026.
+7. **Próximos passos:** testar o push direto na `main` dos 3 serviços (Seção 5), a gravação do vídeo numa nova subida e o PDF. A documentação da Seção 8 foi fechada em 16/11/2026.
 
 ### Ambiente na AWS
 
@@ -125,13 +125,13 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud: proteção de branch nos repositórios do Kauã, roteiro do vídeo e PDF.
+Dá para avançar sem cloud: teste do push direto na `main` dos 3 serviços, roteiro do vídeo e PDF.
 
 ---
 
 ## Dimensão
 
-Contagem de 16/11/2026: **58 pendentes, 269 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 16/11/2026: **55 pendentes, 272 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
@@ -140,7 +140,7 @@ Contagem de 16/11/2026: **58 pendentes, 269 concluídos, 0 não verificáveis**.
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
-| 5. CI/CD Automatizado | 34 | Médio |
+| 5. CI/CD Automatizado | 31 | Médio |
 | 6. Infraestrutura | 1 | Grande |
 | 7. Monitoramento e Observabilidade | 4 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
@@ -364,15 +364,15 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 | Regra | OS | Billing | Execução | lambda-auth | infra-k8s | infra-db |
 |---|---|---|---|---|---|---|
 | Branch principal chamada `main` | [x] | [x] | [x] | [ ] | [x] | [x] |
-| PR obrigatório | [ ] | [ ] | [ ] | [x] | [x] | [x] |
+| PR obrigatório | [x] | [x] | [x] | [x] | [x] | [x] |
 | Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Push direto testado e bloqueado | [ ] | [ ] | [ ] | [x] | [x] | [x] |
 
-Em 16/11/2026, pela conta do Kauã, o `gh api` confirmou que a `main` dos 3 serviços segue sem proteção (`Branch not protected`) e sem ruleset. Na `master` de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
+Em 16/11/2026, o Kauã aplicou na `main` dos 3 serviços a mesma regra da infra: PR obrigatório com 0 aprovações, valendo para administradores (`enforce_admins`), sem force push nem exclusão e sem checagem obrigatória; o `gh api` devolve essa configuração. Falta testar o push direto (linha "Push direto testado e bloqueado"). Na `master` de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
 
 Em `infra-k8s` e `infra-db`, conferido em 14/11/2026 pela conta do Júlio (para a do Kauã, o `gh api` devolvia 404): a `main` exige PR, com 0 aprovações, e não exige checagem (`required_status_checks` vazio). O environment `producao` exige revisor, e é ele que segura o `apply`. Em 16/11/2026 a regra passou a valer também para administradores (`enforce_admins`), e o push direto do Júlio na `main` dos dois foi recusado (`GH006: Protected branch update failed`).
 
-Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`: falta o Kauã aplicar a mesma regra (PR obrigatório, valendo para administradores, sem force push nem exclusão) e renomear a `master` do `lambda-auth` para `main` (o `ci-cd.yml` já aceita as duas). Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
+Nos 4 repositórios do Kauã, o Júlio tem só `write`, e proteção exige `admin`. A `master` do `lambda-auth` continua com esse nome (decidido pelo Kauã em 16/11/2026), então a linha "Branch principal chamada `main`" fica pendente nele. Checagem obrigatória fica de fora enquanto o Actions estiver bloqueado: um check que nunca roda travaria todo merge.
 
 ## 6. Infraestrutura
 
