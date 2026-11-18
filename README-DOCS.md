@@ -3,7 +3,7 @@
 Índice de onde está cada requisito do enunciado ([`docs/requisitos-fase4.md`](docs/requisitos-fase4.md)). O
 estado item a item, com datas e o que ficou de fora, está no [`CHECKLIST.md`](CHECKLIST.md).
 
-**Vídeo de demonstração:** [youtu.be/Hc8mlNsxu9Y](https://youtu.be/Hc8mlNsxu9Y) (14min55s).
+**Vídeo de demonstração:** [youtu.be/Hc8mlNsxu9Y](https://youtu.be/Hc8mlNsxu9Y) (14min55s), público: [conferido em janela anônima](docs/evidencias/video/youtube-janela-anonima.jpg).
 
 ## Repositórios
 
