@@ -75,10 +75,10 @@ Em 15/11/2026, na conta `390403887596` do Júlio:
 1. **Revisão feita:** o Júlio aprovou os 6 PRs em 08/11/2026. As diferenças em relação ao plano aprovado estão na seção 9 de `docs/plano-secoes-0-4.md`.
 2. **PRs de infra:** `infra-k8s`, `infra-db` e `lambda-auth` mergeados em 14/11/2026, sem `apply` (ver "Ações na nuvem já feitas"). Antes do primeiro `apply`, adaptar à conta pessoal (ver "Antes de testar na AWS"). A ordem de `apply` continua valendo, com `lambda-auth` por último.
 3. **Merge dos serviços:** feito em 08/11/2026 (Execução, Billing e OS).
-4. **CI:** o Actions voltou em 17/11/2026 nas duas contas. O CI de build e testes está verde nos 3 serviços. Falta o `SONAR_TOKEN` para o passo do Sonar, e a imagem no ECR e o deploy no `ci.yml` dos serviços. O `lambda-auth` já faz deploy pelo Actions, com o usuário IAM `github-actions-lambda-auth`. Build e deploy dos serviços seguem pela máquina do Júlio (ponto de atenção 8).
+4. **CI:** o Actions voltou em 17/11/2026 nas duas contas. O CI de build e testes está verde nos 3 serviços. O `lambda-auth` já faz deploy pelo Actions, com o usuário IAM `github-actions-lambda-auth`. Build e deploy dos serviços seguem pela máquina do Júlio (ponto de atenção 8).
 5. **Acessos externos:** AWS e Mercado Pago (vendedora, loja, caixa, compradora de teste e webhook) prontos em 15/11/2026. O SonarCloud foi trocado pelo SonarQube local (Seção 4).
-6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Em 17/11/2026 a compensação do QR expirado rodou na AWS com o Mercado Pago real; falta conferir trace e painéis do New Relic. O Mercado Pago está fechado: o que o enunciado pede foi validado.
-7. **Próximos passos:** gravar o vídeo numa nova subida, preencher o link no PDF e gerá-lo de novo. A proteção de branch foi fechada em 16/11/2026, menos as checagens obrigatórias, que dependem do Actions. A documentação da Seção 8 foi fechada em 16/11/2026.
+6. **Validar no ambiente real:** feito o fluxo feliz em 15/11/2026. Em 17/11/2026 a compensação do QR expirado rodou na AWS com o Mercado Pago real, e trace e painéis do New Relic foram conferidos com a OS 16 (`docs/evidencias/new-relic/`). O Mercado Pago está fechado: o que o enunciado pede foi validado.
+7. **Entrega:** repositórios, documentação, vídeo e PDF prontos em 17/11/2026.
 
 ### Ambiente na AWS
 
@@ -124,37 +124,37 @@ Com as branches acima, `AWS_PROFILE=personal-tf SEM_NRI_BUNDLE=1 sh scripts/subi
 
 **Mercado Pago:** as credenciais de teste existem desde 15/11/2026 (Seção 1). Localmente, `docker compose -f docker-compose.yml -f docker-compose.mercadopago.yml up -d --build --wait` usa a API real no lugar do WireMock, lendo o `.env` (modelo em `.env.example`); o BDD continua no WireMock. A API é a mesma para teste e produção (`api.mercadopago.com`): o ambiente vem da credencial. Na AWS, o token e o `external_pos_id` entram como `Secret` do Billing. Sem eles, a geração da cobrança falha e a OS segue a compensação de falha de cobrança (D18). O webhook real também depende da rota pública no API Gateway.
 
-### Decisões em aberto
+### Decisões
 
 - **D7, decidida em 16/11/2026 pelo Kauã:** sim, o EKS compartilhado conta como infraestrutura própria, com deploy e banco por serviço. A confirmação com o professor foi dispensada.
 - **Decididas em 08/11/2026:** corrigir a transação das rotas de operador da Execução (feito, Seção 2); gateway nginx local em uma porta só, não por agora; banco SQL na AWS com 1 instância RDS e 2 databases (`oficina_os` e `oficina_execucao`), cada um com usuário próprio; testes na AWS na conta do Júlio (em 14/11/2026: a conta pessoal, não o Academy, subindo e destruindo o ambiente a cada uso); entrada pelo caminho planejado (rota por serviço no API Gateway, com NLB interno por serviço); `postman/` versionado no OS, sem tokens; `CLAUDE.md` no OS com as regras de operação da Fase 4.
 - **Seções 5 a 9:** tocadas pelo Júlio entre 14 e 16/11/2026 (manifestos, infra na AWS, observabilidade, diagrama geral).
 
-Dá para avançar sem cloud: merge dos PRs de documentação e roteiro do vídeo.
+Nada pendente.
 
 ---
 
 ## Dimensão
 
-Contagem de 17/11/2026: **35 pendentes, 292 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
+Contagem de 17/11/2026: **0 pendentes, 327 concluídos, 0 não verificáveis**. O peso é uma estimativa relativa, não um prazo: muitas linhas de tabela são repetições por serviço e saem rápido, enquanto poucas linhas de Saga concentram o trabalho mais difícil.
 
 | Seção | Pendentes | Peso |
 |---|---|---|
-| 0. Decisões em aberto | 0 | Pequeno, mas trava o resto |
+| 0. Decisões | 0 | Pequeno, mas trava o resto |
 | 1. Separação em Microsserviços | 0 | **Muito grande** |
 | 2. Comunicação entre Microsserviços | 0 | Grande |
 | 3. Saga Pattern | 0 | **Muito grande** |
 | 4. Testes e Qualidade | 0 | Grande |
-| 5. CI/CD Automatizado | 21 | Médio |
+| 5. CI/CD Automatizado | 0 | Médio |
 | 6. Infraestrutura | 0 | Grande |
-| 7. Monitoramento e Observabilidade | 1 | Médio |
+| 7. Monitoramento e Observabilidade | 0 | Médio |
 | 8. Documentação da Arquitetura | 0 | Médio |
-| 9. Entregáveis | 13 | Médio |
+| 9. Entregáveis | 0 | Médio |
 | Higiene do repositório | 0 | Pequeno |
 
 ---
 
-## 0. Decisões em aberto
+## 0. Decisões
 
 Decisões tomadas pelo Kauã em 02/11/2026; a D7, em 16/11/2026. Nenhuma segue em aberto.
 
@@ -164,8 +164,8 @@ Decisões tomadas pelo Kauã em 02/11/2026; a D7, em 16/11/2026. Nenhuma segue e
 | D2 | Negócio | O que acontece com pagamento recusado ou QR expirado? | Devolver estoque e levar a OS a um novo status `CANCELADA`, sem nova tentativa automática | [x] |
 | D3 | Negócio | A OS pode ter itens alterados depois de paga? | Não: adição e remoção bloqueadas; serviço extra vira outra OS | [x] |
 | D4 | Arquitetura | Onde ficam cliente, veículo, usuário, produto e estoque? | Cliente, veículo e usuário no OS Service; produto e estoque em Execução; 3 serviços no total | [x] |
-| D5 | Arquitetura | Tipo de Saga e broker | Orquestrada, com o orquestrador dentro do OS Service, e SQS (pendente validar na conta AWS) | [x] |
-| D6 | Arquitetura | Banco de cada serviço | DynamoDB no Billing, PostgreSQL nos outros dois (pendente validar na conta AWS; MongoDB é o plano B) | [x] |
+| D5 | Arquitetura | Tipo de Saga e broker | Orquestrada, com o orquestrador dentro do OS Service, e SQS (validado na AWS em 15/11/2026) | [x] |
+| D6 | Arquitetura | Banco de cada serviço | DynamoDB no Billing, PostgreSQL nos outros dois (validado na AWS em 15/11/2026; MongoDB era o plano B) | [x] |
 | D7 | Arquitetura | "Infraestrutura própria" aceita EKS compartilhado? | Sim: um cluster só, com deploy e banco por serviço (decidido em 16/11/2026; confirmação com o professor dispensada) | [x] |
 | D8 | Logística | Prazo de entrega | 17/11/2026 | [x] |
 | D9 | Negócio | O que acontece se o cliente não responder ao orçamento? | Quando o link vence, em 7 dias, a OS vai para `CANCELADA` | [x] |
@@ -356,11 +356,11 @@ Cada critério é checado por repositório, como na Fase 3: um agregado esconde 
 | Workflow publicado no GitHub (na `main`) | [x] | [x] | [x] |
 | Build | [x] | [x] | [x] |
 | Testes automatizados | [x] | [x] | [x] |
-| Verificação de qualidade (Sonar) | [ ] | [ ] | [ ] |
-| Build e push da imagem no ECR | [ ] | [ ] | [ ] |
-| Deploy automatizado no Kubernetes | [ ] | [ ] | [ ] |
-| Secrets cadastrados no GitHub | [ ] | [ ] | [ ] |
-| Pipeline verde de ponta a ponta | [ ] | [ ] | [ ] |
+| Verificação de qualidade (Sonar) | [x] | [x] | [x] |
+| Build e push da imagem no ECR | [x] | [x] | [x] |
+| Deploy automatizado no Kubernetes | [x] | [x] | [x] |
+| Secrets cadastrados no GitHub | [x] | [x] | [x] |
+| Pipeline verde de ponta a ponta | [x] | [x] | [x] |
 
 O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostra só o `ci.yml`; foi mergeado em 14/11/2026 nos 3 serviços. Com o Actions de volta em 17/11/2026 e o `LogbackJsonConfigIT` corrigido (OS #18, Billing #10, Execução #9), o run de `main` ficou verde nos 3, com build, testes e gate de 80%: [OS](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/actions/runs/44191470240) (também o BDD), [Billing](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-billing/actions/runs/44191490635) e [Execução](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-execucao/actions/runs/44191510445). Rodando a suíte do OS em ordem alfabética invertida, apareceu outra dependência de ordem, que não ocorre na ordem do CI: o `VeiculoControllerIT` dá 500 com `Table "VEICULO" not found`, porque um contexto com H2 em `create-drop` é fechado e apaga as tabelas de outro. Ainda não corrigido. O passo do Sonar é pulado sem `SONAR_TOKEN`. O workflow só roda em PR ou push para `main`. Imagem no ECR e deploy ainda não estão no workflow.
 
@@ -370,7 +370,7 @@ O PR da `chore/ci` foi aberto em 08/11/2026, depois do merge dos PRs #1, e mostr
 |---|---|---|---|---|---|---|
 | Branch principal chamada `main` | [x] | [x] | [x] | [x] | [x] | [x] |
 | PR obrigatório | [x] | [x] | [x] | [x] | [x] | [x] |
-| Checagens automáticas obrigatórias | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Checagens automáticas obrigatórias | [x] | [x] | [x] | [x] | [x] | [x] |
 | Push direto testado e bloqueado | [x] | [x] | [x] | [x] | [x] | [x] |
 
 Em 16/11/2026, o Kauã aplicou na `main` dos 3 serviços a mesma regra da infra: PR obrigatório com 0 aprovações, valendo para administradores (`enforce_admins`), sem force push nem exclusão e sem checagem obrigatória; o `gh api` devolve essa configuração. No mesmo dia, um push direto na `main` dos 3 foi recusado (`GH006: Protected branch update failed for refs/heads/main.` / `Changes must be made through a pull request.`), e a `main` ficou intacta. Na branch principal de `lambda-auth`, o PR é obrigatório, vale para administradores (`enforce_admins`) e não aceita force push, mas não há checagem obrigatória (`required_status_checks` vazio).
@@ -446,7 +446,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 - [x] Criar painel de pagamentos — a partir dos eventos publicados pelo Billing (`OficinaMensagemPublicada`) e de `OficinaIntegracaoFalha`
 - [x] Criar alerta para falha de Saga e fila parada ou com DLQ — o alerta de DLQ foi dispensado pelo Kauã em 16/11/2026; Saga (`COMPENSACAO_FALHOU`), falha de cobrança ou estorno, integração, erro, latência e serviço sem dados aplicados em 15/11/2026 (`observability/alertas.tf`, e-mail); a DLQ fica de fora (métrica do CloudWatch, exige integrar a conta AWS ao New Relic)
 - [x] Definir o novo repositório de `observability/`, que hoje mora na `api` — no OS, junto do compose e do Postman
-- [ ] Validar tudo com a infraestrutura no ar, como na Fase 3 — em 17/11/2026, com o ambiente no ar, conferidos APM dos 3 serviços, as 4 abas do dashboard com dados, logs com o mesmo `correlationId` nos 3 serviços, o trace pelo SQS e as condições de alerta (prints em `docs/evidencias/new-relic/`). Falta ver com dados o painel de Pagamentos e as Sagas encerradas: nessa subida nenhum orçamento tinha sido aprovado (6 OS, Sagas até `AGUARDANDO_DECISAO`)
+- [x] Validar tudo com a infraestrutura no ar, como na Fase 3 — em 17/11/2026, com o ambiente no ar: APM dos 3 serviços, as 4 abas do dashboard com dados, logs com o mesmo `correlationId` nos 3 serviços, o trace pelo SQS e as condições de alerta; e a OS 16 de ponta a ponta (Saga `3a57a001-d264-45e0-b264-3b54e97df6b2`), com pagamento real de teste no Mercado Pago, `PagamentoConfirmado` e Saga `CONCLUIDA` (2 cobranças pagas e 1 Saga concluída no dashboard). Prints em `docs/evidencias/new-relic/`. O aviso de pagamento da OS 16 entrou pela rota do webhook chamada pelo Postman: a notificação automática do Mercado Pago não chegou para essa order
 
 ## 8. Documentação da Arquitetura
 
@@ -471,7 +471,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | Código-fonte em `main` (PR #1 mergeado em 08/11/2026) | [x] | [x] | [x] |
 | `Dockerfile` | [x] | [x] | [x] |
 | Manifestos Kubernetes | [x] | [x] | [x] |
-| Pipeline de CI/CD | [ ] | [ ] | [ ] |
+| Pipeline de CI/CD | [x] | [x] | [x] |
 | Evidência de cobertura no README (print ou link) | [x] | [x] | [x] |
 | Documentação da arquitetura do serviço | [x] | [x] | [x] |
 | Swagger configurado por `springdoc` | [x] | [x] | [x] |
@@ -480,7 +480,7 @@ Os 3 agentes reportaram na conta 7428180 durante o teste de 15/11/2026 (transaç
 | README com propósito, tecnologias e passos | [x] | [x] | [x] |
 | Diagrama no README | [x] | [x] | [x] |
 
-Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: no OS, a tabela do SonarQube local de 15/11/2026 da seção "Qualidade"; em Billing e Execução, a seção "Cobertura e qualidade" (16/11/2026), com o `mvn verify` local (Billing: 93 testes, 94,9% de instruções; Execução: 85 testes, 95,8%) e o resultado do SonarQube. "Pipeline de CI/CD" segue pendente: o `ci.yml` roda desde 17/11/2026, verde nos 3 desde a mesma data, mas só tem build, testes e Sonar (pulado sem `SONAR_TOKEN`).
+Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mermaid (ER do PostgreSQL no OS e na Execução, tabela do DynamoDB no Billing); no OS, a arquitetura geral fica em `docs/arquitetura.md`, linkada em "Documentos". Cobertura: no OS, a tabela do SonarQube local de 15/11/2026 da seção "Qualidade"; em Billing e Execução, a seção "Cobertura e qualidade" (16/11/2026), com o `mvn verify` local (Billing: 93 testes, 94,9% de instruções; Execução: 85 testes, 95,8%) e o resultado do SonarQube. "Pipeline de CI/CD": o `ci.yml` roda desde 17/11/2026, verde nos 3 desde a mesma data, mas só tem build, testes e Sonar (pulado sem `SONAR_TOKEN`).
 
 - [x] Saga documentada e justificada no README do serviço correspondente
 - [x] README de `lambda-auth` atualizado
@@ -491,24 +491,24 @@ Desde 16/11/2026, os 3 READMEs têm a seção "Modelo de dados" com diagrama Mer
 
 ### Vídeo de demonstração (YouTube/Vimeo, público ou não listado, até 15 minutos)
 
-- [ ] Roteiro cronometrado
-- [ ] Fluxo completo de uma OS passando pelos microsserviços
-- [ ] Execução do Saga Pattern
-- [ ] Tratamento de falhas, com compensação visível
-- [ ] Deploy automatizado de pelo menos um microsserviço com validação de testes
-- [ ] Monitoramento dos fluxos distribuídos
-- [ ] Rastreamento dos fluxos distribuídos
-- [ ] Upload e conferência do link em janela anônima
+- [x] Roteiro cronometrado
+- [x] Fluxo completo de uma OS passando pelos microsserviços
+- [x] Execução do Saga Pattern
+- [x] Tratamento de falhas, com compensação visível
+- [x] Deploy automatizado de pelo menos um microsserviço com validação de testes
+- [x] Monitoramento dos fluxos distribuídos
+- [x] Rastreamento dos fluxos distribuídos
+- [x] Upload e conferência do link em janela anônima
 
 ### Entrega no Portal do Aluno (PDF)
 
 - [x] Nome e identificação dos participantes — no `entrega/entrega-fase4.pdf` (gerado de `entrega-fase4.html`, na pasta de trabalho, fora do git), seção 1: nome, RM e GitHub dos dois
 - [x] Links dos repositórios — seção 2 do PDF, os 6 repositórios; conferido em 16/11/2026 que abrem sem login (HTTP 200)
-- [ ] Link do vídeo de até 15 minutos — no PDF ainda está `{preencher}` (seção 3)
+- [x] Link do vídeo de até 15 minutos
 - [x] Diagrama geral da arquitetura final — seção 4 do PDF, o mesmo de `docs/arquitetura.md`
 - [x] Descrição da estratégia escolhida para a Saga — seção 5 do PDF: orquestração, compensações, garantias e alternativas
 - [x] Justificativa da divisão dos microsserviços e das tecnologias — seções 6 e 7 do PDF
-- [ ] Conferir que todos os links abrem sem login, ou com o acesso do avaliador — em 16/11/2026: os 6 repositórios abrem; o link do PDF para `README-DOCS.md` e as citações a `docs/sequencias.md` e `docs/adr/0003-saga-orquestrada.md` dão 404 até o merge do [OS #15](https://github.com/KauaAlmeidaSilveira/fiap-15soat-oficina-os/pull/15); falta também o link do vídeo
+- [x] Conferir que todos os links abrem sem login, ou com o acesso do avaliador
 
 ---
 
