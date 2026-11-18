@@ -210,15 +210,16 @@ mvn verify
 ## Qualidade (SonarQube)
 
 O enunciado pede validação de qualidade "via SonarQube ou similar no CI". O passo está no
-`.github/workflows/ci.yml` de cada serviço (SonarCloud, ligado pelo secret `SONAR_TOKEN`), mas o GitHub
-Actions das contas está bloqueado por billing. A validação roda localmente, com o mesmo quality gate:
+`.github/workflows/ci.yml` de cada serviço (SonarCloud, ligado pelo secret `SONAR_TOKEN`). Desde 17/11/2026 o
+CI roda no GitHub Actions (build, testes e gate de 80% de cobertura), mas o passo do Sonar fica pulado sem o
+token. A análise de qualidade roda localmente, com o mesmo quality gate:
 
 ```bash
 sh scripts/sonar-local.sh          # sobe o SonarQube em Docker, roda mvn verify e a análise dos 3 serviços
                                     # e espera o quality gate "Sonar way"; painel em http://localhost:9000
 ```
 
-O script sai com erro se algum serviço falhar nos testes ou no gate. Resultado de 15/11/2026:
+O script sai com erro se algum serviço falhar nos testes ou no gate. Resultado de 17/11/2026, na `main`:
 
 | Serviço | Quality gate | Cobertura | Confiabilidade | Segurança | Revisão de segurança | Manutenibilidade | Duplicação |
 |---|---|---|---|---|---|---|---|
@@ -230,6 +231,11 @@ Revisões registradas no SonarQube: CSRF desligado é seguro (APIs stateless, au
 `Authorization: Bearer`, sem cookie nem sessão); CORS liberado é seguro (`allowCredentials=false`, token
 Bearer, entrada pelo API Gateway); a regra S5841 em `ExecucaoControllerTransacaoIT` é falso positivo (o teste
 afirma que um evento não foi publicado, e a lista vazia é o caso esperado).
+
+Prints do SonarQube em 17/11/2026 ([OS](docs/evidencias/sonar/os.png), [Execução](docs/evidencias/sonar/execucao.png),
+[Billing](docs/evidencias/sonar/billing.png)):
+
+![SonarQube: os 3 serviços aprovados no quality gate](docs/evidencias/sonar/projetos.png)
 
 ## Documentos
 
