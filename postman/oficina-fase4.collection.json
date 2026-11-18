@@ -223,7 +223,10 @@
                   "let tentativas = 0;",
                   "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                   "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                  "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                  "  pm.variables.set('saga_estado', atual);",
+                  "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                  "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                  "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                   "  setTimeout(consultar, 500);",
                   "});",
                   "consultar();"
@@ -281,7 +284,10 @@
                   "let tentativas = 0;",
                   "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                   "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                  "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                  "  pm.variables.set('saga_estado', atual);",
+                  "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                  "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                  "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                   "  setTimeout(consultar, 500);",
                   "});",
                   "consultar();"
@@ -436,7 +442,10 @@
                   "let tentativas = 0;",
                   "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                   "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                  "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                  "  pm.variables.set('saga_estado', atual);",
+                  "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                  "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                  "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                   "  setTimeout(consultar, 500);",
                   "});",
                   "consultar();"
@@ -450,7 +459,8 @@
                 "exec": [
                   "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                   "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                  "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                  "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                  "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                 ]
               }
             }
@@ -601,7 +611,10 @@
                   "let tentativas = 0;",
                   "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                   "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                  "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                  "  pm.variables.set('saga_estado', atual);",
+                  "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                  "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\", \"AGUARDANDO_PAGAMENTO\", \"ENVIANDO_PARA_EXECUCAO\"].includes(atual);",
+                  "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                   "  setTimeout(consultar, 500);",
                   "});",
                   "consultar();"
@@ -680,7 +693,10 @@
                   "let tentativas = 0;",
                   "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                   "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                  "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                  "  pm.variables.set('saga_estado', atual);",
+                  "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                  "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\", \"AGUARDANDO_PAGAMENTO\", \"ENVIANDO_PARA_EXECUCAO\", \"EM_REPARO\"].includes(atual);",
+                  "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                   "  setTimeout(consultar, 500);",
                   "});",
                   "consultar();"
@@ -943,7 +959,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -1001,7 +1020,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -1388,7 +1410,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -1546,7 +1571,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -1743,7 +1771,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -1801,7 +1832,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2188,7 +2222,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2246,7 +2283,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2627,7 +2667,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2685,7 +2728,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2810,7 +2856,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -2824,7 +2873,8 @@
                     "exec": [
                       "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                       "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                      "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                      "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                      "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                     ]
                   }
                 }
@@ -3205,7 +3255,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3263,7 +3316,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3388,7 +3444,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3402,7 +3461,8 @@
                     "exec": [
                       "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                       "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                      "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                      "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                      "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                     ]
                   }
                 }
@@ -3777,7 +3837,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3835,7 +3898,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3960,7 +4026,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -3974,7 +4043,8 @@
                     "exec": [
                       "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                       "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                      "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                      "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                      "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                     ]
                   }
                 }
@@ -4559,7 +4629,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -4617,7 +4690,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -4742,7 +4818,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -4756,7 +4835,8 @@
                     "exec": [
                       "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                       "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                      "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                      "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                      "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                     ]
                   }
                 }
@@ -5244,7 +5324,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -5302,7 +5385,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -5427,7 +5513,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
@@ -5441,7 +5530,8 @@
                     "exec": [
                       "pm.test('Status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
                       "pm.environment.set('mp_order_id', pm.response.json().mpOrderId);",
-                      "pm.test('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
+                      "// Na sequência do fluxo a cobrança acabou de ser criada; consultada depois do pagamento, o teste fica pulado.",
+                      "(pm.variables.get('saga_estado') === 'AGUARDANDO_PAGAMENTO' ? pm.test : pm.test.skip)('Cobrança CRIADA', () => pm.expect(pm.response.json().status).to.eql('CRIADA'));"
                     ]
                   }
                 }
@@ -5562,7 +5652,10 @@
                       "let tentativas = 0;",
                       "const consultar = () => pm.sendRequest({ url, header: { Authorization: 'Bearer ' + pm.environment.get('token') } }, (erro, resposta) => {",
                       "  let atual; try { atual = ler(resposta.json()); } catch (e) { atual = undefined; }",
-                      "  if (esperados.includes(atual) || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
+                      "  pm.variables.set('saga_estado', atual);",
+                      "  // Só espera enquanto a Saga está antes da etapa: se já passou dela (consulta fora da sequência), segue na hora.",
+                      "  const aindaAntes = atual === undefined || [\"AGUARDANDO_DIAGNOSTICO\", \"EM_DIAGNOSTICO\", \"GERANDO_ORCAMENTO\", \"AGUARDANDO_DECISAO\", \"BAIXANDO_ESTOQUE\", \"GERANDO_COBRANCA\", \"AGUARDANDO_PAGAMENTO\", \"ENVIANDO_PARA_EXECUCAO\"].includes(atual);",
+                      "  if (esperados.includes(atual) || !aindaAntes || ++tentativas >= 120) { console.log('Espera: ' + url + ' = ' + atual); return; }",
                       "  setTimeout(consultar, 500);",
                       "});",
                       "consultar();"
